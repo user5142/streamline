@@ -1,4 +1,3 @@
-import Link from "next/link";
 import GanttView from "./GanttView";
 
 export const dynamic = "force-dynamic";
@@ -11,10 +10,7 @@ export default function GanttPage() {
     <main className="min-h-screen p-8 pb-24">
       <section className="max-w-6xl mx-auto space-y-6">
         <div>
-          <Link href="/dashboard" className="link link-hover text-sm">
-            ← Dashboard
-          </Link>
-          <h1 className="text-3xl md:text-4xl font-extrabold mt-1">
+          <h1 className="text-3xl md:text-4xl font-extrabold">
             Gantt timeline
           </h1>
           <p className="text-sm text-base-content/70 mt-1">

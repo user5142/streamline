@@ -35,10 +35,7 @@ export default async function MyTasksPage() {
     <main className="min-h-screen p-8 pb-24">
       <section className="max-w-4xl mx-auto space-y-8">
         <div>
-          <Link href="/dashboard" className="link link-hover text-sm">
-            ← Dashboard
-          </Link>
-          <h1 className="text-3xl md:text-4xl font-extrabold mt-1">My tasks</h1>
+          <h1 className="text-3xl md:text-4xl font-extrabold">My tasks</h1>
           <p className="text-sm text-base-content/70 mt-1">
             Tasks assigned to you across all projects.
           </p>

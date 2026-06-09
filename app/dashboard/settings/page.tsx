@@ -93,12 +93,7 @@ export default function SettingsPage() {
       <section className="max-w-3xl mx-auto space-y-8">
         <div className="flex items-center justify-between">
           <div>
-            <Link href="/dashboard" className="link link-hover text-sm">
-              ← Dashboard
-            </Link>
-            <h1 className="text-3xl md:text-4xl font-extrabold mt-1">
-              Settings
-            </h1>
+            <h1 className="text-3xl md:text-4xl font-extrabold">Settings</h1>
           </div>
           <Link href="/dashboard/settings/teams" className="btn btn-sm">
             Manage teams

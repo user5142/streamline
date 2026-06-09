@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { getProfile } from "@/libs/supabase/getProfile";
 import ProjectsClient from "./ProjectsClient";
 
@@ -14,10 +13,7 @@ export default async function ProjectsPage() {
     <main className="min-h-screen p-8 pb-24">
       <section className="max-w-5xl mx-auto space-y-8">
         <div>
-          <Link href="/dashboard" className="link link-hover text-sm">
-            ← Dashboard
-          </Link>
-          <h1 className="text-3xl md:text-4xl font-extrabold mt-1">Projects</h1>
+          <h1 className="text-3xl md:text-4xl font-extrabold">Projects</h1>
         </div>
 
         <ProjectsClient orgId={profile.org_id} />
