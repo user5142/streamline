@@ -86,3 +86,9 @@ Prompts are recorded in order. Each entry includes the user's input and the mode
 > * Remove "Product of the day" badge from hero
 > * Comment out Pricing component
 > * Comment out Pricing link in Header and Footer
+
+---
+
+**Model:** Claude Opus 4.8
+
+> Okay, let's start implementing the project requirements. Please note that currently the sign-in/auth options are Google OAuth and Magic Link, but what we need to implement is sign in/auth with email and password. Google OAuth and Magic Link paths should not be deleted, rather commented out/disabled. Can you help me come up with an implementation plan to implement our requirements from streamline-requirements, chunk by chunk?
