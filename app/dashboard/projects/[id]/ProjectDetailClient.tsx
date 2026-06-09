@@ -10,9 +10,9 @@ import type { Project, Team } from "@/types/database";
 
 type OrgMember = { id: string; full_name: string | null; email: string | null };
 
-// Editable project detail. "Assigned members" (PRJ-02) is derived from task
-// assignees, so the full member roll-up arrives with Chunk 6 (Tasks); for now
-// the owner is shown.
+// Editable project detail. The project's assigned members (PRJ-02) are derived
+// from task assignees and shown in the Tasks section (rendered below this form
+// on the project page) as the "People" list.
 export default function ProjectDetailClient({
   project,
   teams,

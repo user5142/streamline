@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { createClient } from "@/libs/supabase/server";
 import ProjectDetailClient from "./ProjectDetailClient";
+import TasksSection from "./TasksSection";
 import type { Project, Team } from "@/types/database";
 
 export const dynamic = "force-dynamic";
@@ -40,6 +41,18 @@ export default async function ProjectPage({
         <ProjectDetailClient
           project={project}
           teams={(teamsRes.data as Team[]) ?? []}
+          members={
+            (membersRes.data as {
+              id: string;
+              full_name: string | null;
+              email: string | null;
+            }[]) ?? []
+          }
+        />
+
+        <TasksSection
+          projectId={project.id}
+          orgId={project.org_id}
           members={
             (membersRes.data as {
               id: string;

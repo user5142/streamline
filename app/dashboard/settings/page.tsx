@@ -53,9 +53,11 @@ export default function SettingsPage() {
       if (error) throw error;
 
       const created = data as Invite;
-      await navigator.clipboard
-        .writeText(inviteUrl(created.token))
-        .catch(() => null);
+      try {
+        await navigator.clipboard.writeText(inviteUrl(created.token));
+      } catch {
+        // Clipboard may be unavailable (e.g. insecure context); not fatal.
+      }
       toast.success("Invite link created and copied to clipboard.");
       await loadInvites();
     } catch (error) {

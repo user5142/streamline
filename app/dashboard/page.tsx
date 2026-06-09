@@ -20,6 +20,9 @@ export default async function Dashboard() {
             <Link href="/dashboard/projects" className="btn btn-sm">
               Projects
             </Link>
+            <Link href="/dashboard/my-tasks" className="btn btn-sm btn-ghost">
+              My tasks
+            </Link>
             {isAdmin && (
               <Link href="/dashboard/settings" className="btn btn-sm btn-ghost">
                 Settings
