@@ -6,7 +6,6 @@ import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import ButtonSignin from "./ButtonSignin";
-import logo from "@/app/icon.png";
 import config from "@/config";
 
 const links: {
@@ -49,20 +48,18 @@ const Header = () => {
         {/* Your logo/name on large screens */}
         <div className="flex lg:flex-1">
           <Link
-            className="flex items-center gap-2 shrink-0 "
+            className="flex items-center shrink-0 "
             href="/"
             title={`${config.appName} homepage`}
           >
             <Image
-              src={logo}
+              src="/streamline-logo.svg"
               alt={`${config.appName} logo`}
-              className="w-8"
-              placeholder="blur"
+              className="h-8 w-auto"
               priority={true}
-              width={32}
+              width={211}
               height={32}
             />
-            <span className="font-extrabold text-lg">{config.appName}</span>
           </Link>
         </div>
         {/* Burger button to open menu on mobile */}
@@ -116,20 +113,18 @@ const Header = () => {
           {/* Your logo/name on small screens */}
           <div className="flex items-center justify-between">
             <Link
-              className="flex items-center gap-2 shrink-0 "
+              className="flex items-center shrink-0 "
               title={`${config.appName} homepage`}
               href="/"
             >
               <Image
-                src={logo}
+                src="/streamline-logo.svg"
                 alt={`${config.appName} logo`}
-                className="w-8"
-                placeholder="blur"
+                className="h-8 w-auto"
                 priority={true}
-                width={32}
+                width={211}
                 height={32}
               />
-              <span className="font-extrabold text-lg">{config.appName}</span>
             </Link>
             <button
               type="button"

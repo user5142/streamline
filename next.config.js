@@ -2,6 +2,12 @@
 const nextConfig = {
   reactStrictMode: true,
   images: {
+    // Allow serving our own SVG assets (e.g. /logo.svg) through next/image.
+    // Hardened per Next.js guidance: force download disposition + a strict CSP
+    // so an SVG can never execute script in the image response.
+    dangerouslyAllowSVG: true,
+    contentDispositionType: 'attachment',
+    contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
     remotePatterns: [
       {
         protocol: 'https',

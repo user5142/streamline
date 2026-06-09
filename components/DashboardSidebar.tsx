@@ -2,6 +2,7 @@
 
 import { ReactNode } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import config from "@/config";
 import ButtonAccount from "./ButtonAccount";
@@ -127,9 +128,16 @@ const DashboardSidebar = ({ isAdmin }: { isAdmin: boolean }) => {
       <Link
         href="/dashboard/gantt"
         onClick={closeDrawer}
-        className="flex items-center gap-2 px-5 h-16 shrink-0 font-extrabold text-lg"
+        className="flex items-center px-5 h-16 shrink-0"
       >
-        {config.appName}
+        <Image
+          src="/streamline-logo.svg"
+          alt={`${config.appName} logo`}
+          width={185}
+          height={28}
+          className="h-5 w-auto"
+          priority
+        />
       </Link>
 
       <nav className="flex-1 overflow-y-auto px-3 py-2">
