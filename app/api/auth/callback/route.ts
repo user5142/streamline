@@ -4,7 +4,14 @@ import config from "@/config";
 
 export const dynamic = "force-dynamic";
 
-// This route is called after a successful login. It exchanges the code for a session and redirects to the callback URL (see config.js).
+// PKCE code-exchange callback.
+//
+// MVP v1 uses email/password auth, which establishes the session directly on
+// the client and does NOT route through here. This handler is retained for the
+// OAuth and Magic Link flows (currently disabled in app/signin/page.tsx) — they
+// redirect back with a `?code=` param that must be exchanged for a session.
+// It also handles the email-confirmation link for password sign-ups when
+// "Confirm email" is enabled in Supabase Auth settings.
 export async function GET(req: NextRequest) {
   const requestUrl = new URL(req.url);
   const code = requestUrl.searchParams.get("code");

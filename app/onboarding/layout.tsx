@@ -4,12 +4,11 @@ import { createClient } from "@/libs/supabase/server";
 import { getProfile } from "@/libs/supabase/getProfile";
 import config from "@/config";
 
-// Server-side gate for all /dashboard subpages:
-//  1. Not signed in            → /signin
-//  2. Signed in but no org yet → /onboarding (create or join an org)
-//  3. Otherwise                → render
-// See https://shipfa.st/docs/tutorials/private-page
-export default async function LayoutPrivate({
+// Gate for onboarding:
+//  - Not signed in        → /signin
+//  - Already has an org    → /dashboard (can't re-onboard)
+//  - Signed in, no org yet → render the onboarding form
+export default async function OnboardingLayout({
   children,
 }: {
   children: ReactNode;
@@ -26,8 +25,8 @@ export default async function LayoutPrivate({
 
   const profile = await getProfile();
 
-  if (!profile?.org_id) {
-    redirect("/onboarding");
+  if (profile?.org_id) {
+    redirect(config.auth.callbackUrl);
   }
 
   return <>{children}</>;

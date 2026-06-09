@@ -24,6 +24,8 @@ supabase db push
 | `0003_teams.sql` | `teams`, `team_members` |
 | `0004_projects.sql` | `projects` |
 | `0005_tasks_action_items.sql` | `tasks`, `task_assignees`, `action_items` |
+| `0006_onboarding.sql` | `create_organization` RPC; locks `org_id`/`role` to definer functions only |
+| `0007_grants.sql` | Base table GRANTs to the `authenticated` role (required alongside RLS) |
 
 ## Notes
 
