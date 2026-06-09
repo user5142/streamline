@@ -16,13 +16,22 @@ export default async function Dashboard() {
       <section className="max-w-xl mx-auto space-y-8">
         <div className="flex items-center justify-between">
           <ButtonAccount />
-          {isAdmin && (
-            <Link href="/dashboard/settings" className="btn btn-sm btn-ghost">
-              Settings
+          <div className="flex items-center gap-2">
+            <Link href="/dashboard/projects" className="btn btn-sm">
+              Projects
             </Link>
-          )}
+            {isAdmin && (
+              <Link href="/dashboard/settings" className="btn btn-sm btn-ghost">
+                Settings
+              </Link>
+            )}
+          </div>
         </div>
-        <h1 className="text-3xl md:text-4xl font-extrabold">Private Page</h1>
+        <h1 className="text-3xl md:text-4xl font-extrabold">Dashboard</h1>
+        <p className="text-base-content/70">
+          Manage your projects, or jump into the company-wide Gantt (coming
+          soon).
+        </p>
       </section>
     </main>
   );
