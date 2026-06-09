@@ -17,6 +17,9 @@ export default async function Dashboard() {
         <div className="flex items-center justify-between">
           <ButtonAccount />
           <div className="flex items-center gap-2">
+            <Link href="/dashboard/gantt" className="btn btn-sm btn-primary">
+              Gantt
+            </Link>
             <Link href="/dashboard/projects" className="btn btn-sm">
               Projects
             </Link>
@@ -32,8 +35,8 @@ export default async function Dashboard() {
         </div>
         <h1 className="text-3xl md:text-4xl font-extrabold">Dashboard</h1>
         <p className="text-base-content/70">
-          Manage your projects, or jump into the company-wide Gantt (coming
-          soon).
+          Jump into the company-wide Gantt, manage your projects, or review the
+          tasks assigned to you.
         </p>
       </section>
     </main>

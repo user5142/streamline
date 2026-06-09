@@ -1,0 +1,32 @@
+/* Status-based bar colors + project/task differentiation for the Gantt.
+   frappe-gantt applies a task's `custom_class` to its bar wrapper group via
+   classList.add(), which rejects space-separated tokens — so each bar carries a
+   SINGLE token: "gp-<status>" for projects, "gt-<status>" for tasks. */
+
+.gantt .gp-not_started .bar,
+.gantt .gt-not_started .bar {
+  fill: #9ca3af;
+}
+.gantt .gp-in_progress .bar,
+.gantt .gt-in_progress .bar {
+  fill: #3b82f6;
+}
+.gantt .gp-complete .bar,
+.gantt .gt-complete .bar {
+  fill: #22c55e;
+}
+.gantt .gp-on_hold .bar,
+.gantt .gt-blocked .bar {
+  fill: #f59e0b;
+}
+
+/* Task (sub) bars render lighter so the project/task hierarchy is legible when
+   a project is expanded. */
+.gantt [class^="gt-"] .bar,
+.gantt [class*=" gt-"] .bar {
+  opacity: 0.75;
+}
+.gantt [class^="gt-"] .bar-label,
+.gantt [class*=" gt-"] .bar-label {
+  font-style: italic;
+}
