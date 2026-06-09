@@ -98,6 +98,9 @@ export default function SettingsPage() {
               Settings
             </h1>
           </div>
+          <Link href="/dashboard/settings/teams" className="btn btn-sm">
+            Manage teams
+          </Link>
         </div>
 
         <div className="card bg-base-100 border border-base-300">
