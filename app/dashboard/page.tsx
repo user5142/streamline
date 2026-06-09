@@ -1,4 +1,6 @@
+import Link from "next/link";
 import ButtonAccount from "@/components/ButtonAccount";
+import { getProfile } from "@/libs/supabase/getProfile";
 
 export const dynamic = "force-dynamic";
 
@@ -6,10 +8,20 @@ export const dynamic = "force-dynamic";
 // It's a server compoment which means you can fetch data (like the user profile) before the page is rendered.
 // See https://shipfa.st/docs/tutorials/private-page
 export default async function Dashboard() {
+  const profile = await getProfile();
+  const isAdmin = profile?.role === "admin";
+
   return (
     <main className="min-h-screen p-8 pb-24">
       <section className="max-w-xl mx-auto space-y-8">
-        <ButtonAccount />
+        <div className="flex items-center justify-between">
+          <ButtonAccount />
+          {isAdmin && (
+            <Link href="/dashboard/settings" className="btn btn-sm btn-ghost">
+              Settings
+            </Link>
+          )}
+        </div>
         <h1 className="text-3xl md:text-4xl font-extrabold">Private Page</h1>
       </section>
     </main>

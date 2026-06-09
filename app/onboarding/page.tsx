@@ -95,13 +95,14 @@ export default function Onboarding() {
           </button>
         </form>
 
-        {/* Join-by-invite — wired up in Chunk 3 (redeem_invite RPC). */}
+        {/* Joining an existing org happens via the invite link itself
+            (/invite/[token]), not here. */}
         <div className="divider text-xs text-base-content/50 font-medium">
           OR
         </div>
         <div className="text-center text-sm text-base-content/60">
-          Have an invite link? Joining an existing organization by invite is
-          coming soon.
+          Were you invited to an existing organization? Open the invite link an
+          admin shared with you to join it instead.
         </div>
       </div>
     </main>

@@ -26,6 +26,8 @@ supabase db push
 | `0005_tasks_action_items.sql` | `tasks`, `task_assignees`, `action_items` |
 | `0006_onboarding.sql` | `create_organization` RPC; locks `org_id`/`role` to definer functions only |
 | `0007_grants.sql` | Base table GRANTs to the `authenticated` role (required alongside RLS) |
+| `0008_invites_rpcs.sql` | `create_invite` / `get_invite_preview` / `redeem_invite` RPCs |
+| `0009_fix_invite_token.sql` | Fixes invite token gen to use core `gen_random_uuid()` (no pgcrypto) |
 
 ## Notes
 

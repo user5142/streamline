@@ -27,6 +27,18 @@ export default function Login() {
   const [password, setPassword] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
+  // After auth, send the user to ?next= when present (e.g. an invite link),
+  // otherwise the default callback URL. Only same-origin relative paths are
+  // honored, to avoid open-redirect abuse.
+  const getRedirectTarget = (): string => {
+    if (typeof window === "undefined") return config.auth.callbackUrl;
+    const next = new URLSearchParams(window.location.search).get("next");
+    if (next && next.startsWith("/") && !next.startsWith("//")) {
+      return next;
+    }
+    return config.auth.callbackUrl;
+  };
+
   const handleEmailPassword = async (e: FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
@@ -48,7 +60,7 @@ export default function Login() {
         // session is returned immediately and we can go straight in.
         // Otherwise the user must confirm via the email Supabase sends.
         if (data.session) {
-          router.push(config.auth.callbackUrl);
+          router.push(getRedirectTarget());
           router.refresh();
         } else {
           toast.success("Check your email to confirm your account.");
@@ -62,7 +74,7 @@ export default function Login() {
 
         if (error) throw error;
 
-        router.push(config.auth.callbackUrl);
+        router.push(getRedirectTarget());
         router.refresh();
       }
     } catch (error) {
