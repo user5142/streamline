@@ -23,12 +23,9 @@ interface Feature {
 // - alt: The alt text of the image (if type is 'image')
 const features = [
   {
-    title: "Emails",
+    title: "Company-wide Gantt",
     description:
-      "Send transactional emails, setup your DNS to avoid spam folder (DKIM, DMARC, SPF in subdomain), and listen to webhook to receive & forward emails",
-    type: "video",
-    path: "https://d3m8mk7e1mf7xn.cloudfront.net/app/newsletter.webm",
-    format: "video/webm",
+      "See every active project across your org on one timeline. Filter by team or by person, and expand any project to view its tasks as sub-bars — powered by Frappe Gantt.",
     svg: (
       <svg
         xmlns="http://www.w3.org/2000/svg"
@@ -46,12 +43,12 @@ const features = [
     ),
   },
   {
-    title: "Payments",
+    title: "Projects & tasks",
     description:
-      "Create checkout sessions, handle webhooks to update user's account (subscriptions, one-time payments...) and tips to setup your account & reduce chargebacks",
+      "Create projects with an owner, team, and target dates, then break them into tasks with assignees and due dates. Track status independently at every level, right down to checklist-style action items.",
     type: "image",
     path: "https://images.unsplash.com/photo-1571171637578-41bc2dd41cd2?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=3540&q=80",
-    alt: "A computer",
+    alt: "Project board",
     svg: (
       <svg
         xmlns="http://www.w3.org/2000/svg"
@@ -70,9 +67,9 @@ const features = [
     ),
   },
   {
-    title: "Authentication",
+    title: "Teams & people",
     description:
-      "Magic links setup, login with Google walkthrough, save user in MongoDB/Supabase, private/protected pages & API calls",
+      "Organize your org into teams like Engineering, Marketing, or Operations. Assign projects to teams and tasks to the right people, so the Gantt filters cleanly by either.",
     svg: (
       <svg
         xmlns="http://www.w3.org/2000/svg"
@@ -91,9 +88,9 @@ const features = [
     ),
   },
   {
-    title: "Style",
+    title: "Invite by link",
     description:
-      "Components, animations & sections (like this features section), 20+ themes with daisyUI, automatic dark mode",
+      "Add teammates in seconds with a single, secure invite link. No email setup required — share it on Slack or anywhere else, and links expire after 7 days for safety.",
     svg: (
       <svg
         xmlns="http://www.w3.org/2000/svg"
@@ -216,9 +213,9 @@ const FeaturesAccordion = () => {
     >
       <div className="px-8">
         <h2 className="font-extrabold text-4xl lg:text-6xl tracking-tight mb-12 md:mb-24">
-          All you need to ship your startup fast
+          Everything you need to keep projects on track
           <span className="bg-neutral text-neutral-content px-2 md:px-4 ml-1 md:ml-1.5 leading-relaxed whitespace-nowrap">
-            and get profitable
+            in one view
           </span>
         </h2>
         <div className=" flex flex-col md:flex-row gap-12 md:gap-24">

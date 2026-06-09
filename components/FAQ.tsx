@@ -13,22 +13,53 @@ interface FAQItemProps {
 
 const faqList: FAQItemProps[] = [
   {
-    question: "What do I get exactly?",
-    answer: <div className="space-y-2 leading-relaxed">Loreum Ipseum</div>,
+    question: "What is Streamline?",
+    answer: (
+      <div className="space-y-2 leading-relaxed">
+        Streamline is a lightweight project management tool for people who run
+        projects as part of their role. You get projects, tasks, teams, and a
+        company-wide Gantt chart — without the overhead of heavier tools.
+      </div>
+    ),
   },
   {
-    question: "Can I get a refund?",
+    question: "Who is Streamline for?",
     answer: (
       <p>
-        Yes! You can request a refund within 7 days of your purchase. Reach out
-        by email.
+        Anyone who manages projects but isn&apos;t a formal project manager —
+        team leads, operations folks, marketers, founders. If Jira or Asana
+        feels like too much for how you actually work, Streamline is for you.
       </p>
     ),
   },
   {
-    question: "I have another question",
+    question: "How is it different from Jira or Asana?",
     answer: (
-      <div className="space-y-2 leading-relaxed">Cool, contact us by email</div>
+      <div className="space-y-2 leading-relaxed">
+        It&apos;s deliberately simpler. Streamline focuses on the essentials —
+        projects, tasks, action items, and a clear timeline view — so you can
+        get organized in minutes instead of configuring workflows for hours.
+      </div>
+    ),
+  },
+  {
+    question: "How do I get my team on board?",
+    answer: (
+      <div className="space-y-2 leading-relaxed">
+        Admins generate a secure invite link and share it however they like —
+        Slack, email, anywhere. New teammates join your org in one click. Links
+        expire after 7 days and can only be used once.
+      </div>
+    ),
+  },
+  {
+    question: "Is my organization's data kept private?",
+    answer: (
+      <div className="space-y-2 leading-relaxed">
+        Yes. All data is scoped to your organization and protected by row-level
+        security, so users only ever see projects and tasks within their own
+        org.
+      </div>
     ),
   },
 ];

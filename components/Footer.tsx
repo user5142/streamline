@@ -81,9 +81,9 @@ const Footer = () => {
                     Support
                   </a>
                 )}
-                <Link href="/#pricing" className="link link-hover">
+                {/* <Link href="/#pricing" className="link link-hover">
                   Pricing
-                </Link>
+                </Link> */}
                 <Link href="/blog" className="link link-hover">
                   Blog
                 </Link>

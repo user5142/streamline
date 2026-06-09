@@ -2,10 +2,10 @@ import { ConfigProps } from "./types/config";
 
 const config = {
   // REQUIRED
-  appName: "ShipFast",
+  appName: "Streamline",
   // REQUIRED: a short description of your app for SEO tags (can be overwritten)
   appDescription:
-    "The NextJS boilerplate with all you need to build your SaaS, AI tool, or any other web app.",
+    "Simplified project management for people who manage projects as part of their role — lighter than Jira or Asana, with a company-wide Gantt built in.",
   // REQUIRED (no https://, not trialing slash at the end, just the naked domain)
   domainName: "shipfa.st",
   crisp: {
@@ -26,18 +26,16 @@ const config = {
         //  REQUIRED - Name of the plan, displayed on the pricing page
         name: "Starter",
         // A friendly description of the plan, displayed on the pricing page. Tip: explain why this plan and not others
-        description: "Perfect for small projects",
+        description: "For a single team finding its feet",
         // The price you want to display, the one user will be charged on Stripe.
         price: 99,
         // If you have an anchor price (i.e. $29) that you want to display crossed out, put it here. Otherwise, leave it empty
         priceAnchor: 149,
         features: [
-          {
-            name: "NextJS boilerplate",
-          },
-          { name: "User oauth" },
-          { name: "Database" },
-          { name: "Emails" },
+          { name: "Up to 3 teams" },
+          { name: "Unlimited projects & tasks" },
+          { name: "Company-wide Gantt view" },
+          { name: "Invite teammates by link" },
         ],
       },
       {
@@ -48,18 +46,16 @@ const config = {
         // This plan will look different on the pricing page, it will be highlighted. You can only have one plan with isFeatured: true
         isFeatured: true,
         name: "Advanced",
-        description: "You need more power",
+        description: "For orgs running projects across many teams",
         price: 149,
         priceAnchor: 299,
         features: [
-          {
-            name: "NextJS boilerplate",
-          },
-          { name: "User oauth" },
-          { name: "Database" },
-          { name: "Emails" },
-          { name: "1 year of updates" },
-          { name: "24/7 support" },
+          { name: "Unlimited teams" },
+          { name: "Unlimited projects & tasks" },
+          { name: "Gantt filters by team & person" },
+          { name: "Task-level timeline bars" },
+          { name: "Admin roles & permissions" },
+          { name: "Priority support" },
         ],
       },
     ],

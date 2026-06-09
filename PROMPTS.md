@@ -70,3 +70,19 @@ Prompts are recorded in order. Each entry includes the user's input and the mode
 > Alright let's actually start from scratch, I want to delete everything in the project folder except CLAUDE.md, PROMPT.md, and steamline-requirements.md and de-initialize/remove the git
 >
 > Then I will start over from the beginning of the ShipFast docs/steps. Lmk any questions on this.
+
+---
+
+**Model:** Claude Opus 4.8
+
+> Please update the copy within each component on page.tsx to fit the Streamline product/business. Let me know any questions on this.
+
+---
+
+**Model:** Claude Opus 4.8
+
+> Please make following additional updates: 
+> 
+> * Remove "Product of the day" badge from hero
+> * Comment out Pricing component
+> * Comment out Pricing link in Header and Footer
