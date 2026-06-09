@@ -63,7 +63,7 @@ const NAV_ITEMS: NavItem[] = [
   },
   {
     href: "/dashboard/my-tasks",
-    label: "My tasks",
+    label: "Tasks",
     icon: (
       <svg
         xmlns="http://www.w3.org/2000/svg"
