@@ -57,7 +57,7 @@ export default function Onboarding() {
       </p>
 
       <div className="space-y-10 max-w-xl mx-auto">
-        <form className="form-control w-full space-y-4" onSubmit={handleCreateOrg}>
+        <form className="flex w-full flex-col gap-6" onSubmit={handleCreateOrg}>
           <label className="form-control w-full">
             <span className="label-text mb-1">Your name</span>
             <input
@@ -84,7 +84,7 @@ export default function Onboarding() {
           </label>
 
           <button
-            className="btn btn-primary btn-block"
+            className="btn btn-primary btn-block mt-4"
             disabled={isLoading}
             type="submit"
           >

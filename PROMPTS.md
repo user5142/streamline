@@ -213,3 +213,9 @@ Prompts are recorded in order. Each entry includes the user's input and the mode
 > When I click "Get started" button in header, and "Get started free" button in hero, it takes me to the "welcome back" sign in screen, should take me to the "Create your account" sign up screen instead. Can you please fix this?
 
 ---
+
+**Model:** Claude Opus 4.8
+
+> There is not enough padding on the "Welcome to Streamline" onboarding page between the Name and Org fields, and between those fields and the button. Can you please update this, and update on any other onboarding pages that also need this update?
+
+---
