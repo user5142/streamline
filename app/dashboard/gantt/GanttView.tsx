@@ -251,7 +251,13 @@ export default function GanttView() {
       // (mode 2), which would otherwise scroll only a few pixels per tick.
       const unit =
         e.deltaMode === 1 ? 16 : e.deltaMode === 2 ? window.innerHeight : 1;
-      window.scrollBy({ top: e.deltaY * unit });
+      // Drive the page scroll by setting scrollTop directly rather than
+      // scrollBy(): the app sets `scroll-behavior: smooth` globally, which makes
+      // scrollBy() animate each wheel tick — and rapid ticks interrupt one
+      // another into a jerky stutter. Assigning scrollTop is always instant and
+      // ignores scroll-behavior, so the wheel feels exactly like native scroll.
+      const page = document.scrollingElement || document.documentElement;
+      page.scrollTop += e.deltaY * unit;
     };
     scroller?.addEventListener("wheel", onWheel, { passive: false });
 
