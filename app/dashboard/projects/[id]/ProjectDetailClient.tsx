@@ -43,6 +43,13 @@ export default function ProjectDetailClient({
   );
   const [isSaving, setIsSaving] = useState<boolean>(false);
 
+  const handleStatusChange = (nextStatus: string) => {
+    setStatus(nextStatus);
+    if (nextStatus === "complete" && !actualDate) {
+      setActualDate(new Date().toISOString().slice(0, 10));
+    }
+  };
+
   const handleSave = async (e: FormEvent) => {
     e.preventDefault();
     if (!name.trim()) return;
@@ -120,7 +127,7 @@ export default function ProjectDetailClient({
             <select
               value={status}
               className="select select-bordered"
-              onChange={(e) => setStatus(e.target.value)}
+              onChange={(e) => handleStatusChange(e.target.value)}
             >
               {PROJECT_STATUSES.map((s) => (
                 <option key={s.value} value={s.value}>
@@ -196,6 +203,9 @@ export default function ProjectDetailClient({
               className="input input-bordered"
               onChange={(e) => setActualDate(e.target.value)}
             />
+            <span className="label-text-alt mt-1 text-base-content/50">
+              Set when the project is finished.
+            </span>
           </label>
         </div>
       </div>

@@ -263,3 +263,9 @@ Require stack:
     at require (node:internal/modules/helpers:152:16)
 
 ---
+
+**Model:** Claude Sonnet 4.6
+
+> Please add a Actual Completion field to Projects, this will be used to set the Actual Completion date once projects are actually finished.
+
+---
