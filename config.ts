@@ -7,7 +7,7 @@ const config = {
   appDescription:
     "Simplified project management for people who manage projects as part of their role, not their job title.",
   // REQUIRED (no https://, not trialing slash at the end, just the naked domain)
-  domainName: "shipfa.st",
+  domainName: "streamlineprojects.co",
   crisp: {
     // Crisp website ID. IF YOU DON'T USE CRISP: just remove this => Then add a support email in this config file (resend.supportEmail) otherwise customer support won't work.
     id: "",

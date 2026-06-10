@@ -281,3 +281,9 @@ Require stack:
 **Model:** Claude Opus 4.8
 
 > When I generate invite link, then copy link and paste in an incognito window to test as new user, then click Continue button, the next page it takes me to is "Welcome back" sign in page, but I should be taken instead directly to the Create your account sign up page.
+
+---
+
+**Model:** Claude Opus 4.8
+
+> Please assist me with deploying the app using Vercel. I already have a domain name (streamlineprojects.co) purchased through Namecheap, would like to utilize that as the domain.
