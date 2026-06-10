@@ -3,6 +3,14 @@
   themes: light --default;
 }
 
+/* Override the DaisyUI light theme's primary color (buttons, links, accents) */
+@plugin "daisyui/theme" {
+  name: "light";
+  default: true;
+  --color-primary: #811844;
+  --color-primary-content: #ffffff;
+}
+
 @theme {
   --font-display: "Satoshi", "sans-serif";
   
