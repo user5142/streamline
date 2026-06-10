@@ -11,7 +11,7 @@ const Hero = () => {
         </h1>
         <p className="text-lg opacity-80 leading-relaxed">
           Streamline gives you projects, tasks, and a company-wide Gantt in one
-          clean view — without the weight of Jira or Asana. Built for people who
+          clean view, without the weight of Jira or Asana. Built for people who
           manage projects as part of their role, not their job title.
         </p>
         <button className="btn btn-primary btn-wide">

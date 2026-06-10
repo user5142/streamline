@@ -55,7 +55,7 @@ const Header = () => {
             <Image
               src="/streamline-logo.svg"
               alt={`${config.appName} logo`}
-              className="h-8 w-auto"
+              className="h-6 w-auto"
               priority={true}
               width={211}
               height={32}
