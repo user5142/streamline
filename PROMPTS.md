@@ -319,3 +319,9 @@ Require stack:
 > "Set when the project is finished" looks off, because the "Set" is being displayed right snug next to the Actual Completion field, please make it such that this text wraps to the line below/comes below the field, not on the same line.
 > 
 > Additionally, the Description text and the field are next to each other horizontally, please update so that Description text is above/on top of the free text entry.
+
+---
+
+**Model:** Claude Opus 4.8
+
+> Please update the green color for Complete status on the Gantt view, the current green doesn't fit very well with the other status colors, it's too dark and not cohesive. Please also update the Gantt view such that the project names within the bars are more easily visible, right now, especially on statuses like Completed and In progress, the text is too hard to see with the dark colors behind it.

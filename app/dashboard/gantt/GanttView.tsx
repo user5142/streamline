@@ -21,7 +21,7 @@ const VIEW_MODES: ViewMode[] = ["Day", "Week", "Month"];
 const STATUS_LEGEND: { value: string; label: string; color: string }[] = [
   { value: "not_started", label: "Not started", color: "#cdc0c7" },
   { value: "in_progress", label: "In progress", color: "#811844" },
-  { value: "complete", label: "Complete", color: "#15803d" },
+  { value: "complete", label: "Complete", color: "#16a34a" },
   { value: "on_hold", label: "On hold", color: "#b45309" },
   { value: "blocked", label: "Blocked", color: "#be123c" },
 ];

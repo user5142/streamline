@@ -28,14 +28,17 @@
   fill: #811844;
 }
 
-/* Complete — green fill (bars are 100%, so the fill covers the whole track). */
+/* Complete — fresh emerald fill (bars are 100%, so the fill covers the whole
+   track). Sits at the same tonal weight as the burgundy / amber / rose fills so
+   the five states read as one cohesive ramp; the old #15803d was noticeably
+   darker and broke that rhythm. */
 .gantt .gp-complete .bar,
 .gantt .gt-complete .bar {
-  fill: #c6e6d2;
+  fill: #d6f0e0;
 }
 .gantt .gp-complete .bar-progress,
 .gantt .gt-complete .bar-progress {
-  fill: #15803d;
+  fill: #16a34a;
 }
 
 /* On hold (projects) / blocked (tasks) — amber and rose, matching the pills. */
@@ -61,4 +64,26 @@
 .gantt [class^="gt-"] .bar-label,
 .gantt [class*=" gt-"] .bar-label {
   font-style: italic;
+}
+
+/* Legible labels on saturated bars. The default frappe label is near-black,
+   which vanishes against the dark progress fills (burgundy, emerald, amber,
+   rose). For labels that sit INSIDE a bar we switch to white with a soft dark
+   halo (paint-order draws the stroke behind the fill) so the name reads whether
+   it crosses the dark progress fill or the lighter track behind it. The `.big`
+   variant — which frappe floats to the RIGHT of a too-narrow bar onto the white
+   grid — is excluded so it stays dark and visible there. not_started bars are
+   light throughout, so they keep the default dark label. */
+.gantt .gp-in_progress .bar-label:not(.big),
+.gantt .gt-in_progress .bar-label:not(.big),
+.gantt .gp-complete .bar-label:not(.big),
+.gantt .gt-complete .bar-label:not(.big),
+.gantt .gp-on_hold .bar-label:not(.big),
+.gantt .gt-blocked .bar-label:not(.big) {
+  fill: #ffffff;
+  font-weight: 500;
+  paint-order: stroke;
+  stroke: rgba(36, 16, 25, 0.55); /* brand ink, softened */
+  stroke-width: 2px;
+  stroke-linejoin: round;
 }
