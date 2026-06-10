@@ -2,6 +2,7 @@ import { ReactNode } from "react";
 import { Inter, Space_Grotesk } from "next/font/google";
 import { Viewport } from "next";
 import { getSEOTags } from "@/libs/seo";
+import { Analytics } from "@vercel/analytics/next"
 import ClientLayout from "@/components/LayoutClient";
 import config from "@/config";
 import "./globals.css";
