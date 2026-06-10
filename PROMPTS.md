@@ -287,3 +287,13 @@ Require stack:
 **Model:** Claude Opus 4.8
 
 > Please assist me with deploying the app using Vercel. I already have a domain name (streamlineprojects.co) purchased through Namecheap, would like to utilize that as the domain.
+
+---
+
+**Model:** Claude Opus 4.8
+
+> Got this failure when trying to deploy on Vercel -- what do we need to do to fix? 
+> 
+> Build Failed
+> Vulnerable version of Next.js detected, please update immediately.
+> Further details: https://vercel.com/kb/bulletin/react2shell
