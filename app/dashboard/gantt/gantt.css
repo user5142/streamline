@@ -175,4 +175,7 @@
 .gantt-container {
   scrollbar-width: thin;
   scrollbar-color: #e0d2da transparent;
+  overflow-x: auto;
+  overflow-y: hidden;
+  overscroll-behavior-x: contain;
 }

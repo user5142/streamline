@@ -331,3 +331,15 @@ Require stack:
 **Model:** Claude Opus 4.8
 
 > Please help me improve the design of the Gantt view - ensure the complete bar status color is cohesive with the other colors, make sure the gantt view overall looks very professional, as if designed by a Pro UX/UI Designer. Also, there is some buggy behavoir with the scrolling within the Gantt view when the user uses their mouse scrollwheel, make sure there is a good UX for this, user should be able to scroll vertically up and down with the mouse scrollwheel smoothly, and the view should not scroll horizontally at all from the scrollwheel.
+
+---
+
+**Model:** GPT-5.5
+
+> When I try to scroll vertically up or down with my cursor within the gantt chart, the scroll motion is very jerky/unpleasant, should be smooth as when I am scrolling on other parts of the page. Can you please fix?
+
+---
+
+**Model:** GPT-5.5
+
+> It's still not quite there - it feels almost like my scroll is "hijacked" when scrolling within scrollwheel inside the gantt chart up or down, like the scroll is slower than normal.

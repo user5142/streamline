@@ -234,34 +234,31 @@ export default function GanttView() {
       lines: "horizontal",
     });
 
-    // Scroll UX: frappe renders the chart inside a `.gantt-container` whose
-    // overflow is `auto`. Because that element is wide (the timeline) but rarely
-    // taller than its content, browsers translate a vertical mouse-wheel tick
-    // into a HORIZONTAL scroll of it — the timeline lurches sideways when the
-    // user just meant to scroll the page. We intercept the wheel: vertical
-    // intent is forwarded to normal page scroll, and horizontal wheel/trackpad
-    // motion is swallowed entirely (panning across dates is done with the
-    // scrollbar). The result is smooth vertical scrolling and a timeline that
-    // never drifts sideways from the wheel.
+    // Scroll UX: let vertical wheel events use the browser's native page-scroll
+    // physics. The only custom work here is preventing wheel/trackpad input from
+    // nudging the horizontal timeline; users can still pan dates with the
+    // visible scrollbar.
     const scroller = container.querySelector<HTMLElement>(".gantt-container");
-    const onWheel = (e: WheelEvent) => {
-      e.preventDefault();
-      if (e.deltaY === 0) return;
-      // Normalise to pixels: some mice report deltas in lines (mode 1) or pages
-      // (mode 2), which would otherwise scroll only a few pixels per tick.
-      const unit =
-        e.deltaMode === 1 ? 16 : e.deltaMode === 2 ? window.innerHeight : 1;
-      // Drive the page scroll by setting scrollTop directly rather than
-      // scrollBy(): the app sets `scroll-behavior: smooth` globally, which makes
-      // scrollBy() animate each wheel tick — and rapid ticks interrupt one
-      // another into a jerky stutter. Assigning scrollTop is always instant and
-      // ignores scroll-behavior, so the wheel feels exactly like native scroll.
-      const page = document.scrollingElement || document.documentElement;
-      page.scrollTop += e.deltaY * unit;
-    };
-    scroller?.addEventListener("wheel", onWheel, { passive: false });
+    if (!scroller) return;
 
-    return () => scroller?.removeEventListener("wheel", onWheel);
+    const onWheel = (e: WheelEvent) => {
+      if (e.ctrlKey) return;
+
+      if (Math.abs(e.deltaX) >= Math.abs(e.deltaY)) {
+        e.preventDefault();
+        return;
+      }
+
+      const scrollLeft = scroller.scrollLeft;
+      window.requestAnimationFrame(() => {
+        scroller.scrollLeft = scrollLeft;
+      });
+    };
+    scroller.addEventListener("wheel", onWheel, { passive: false });
+
+    return () => {
+      scroller.removeEventListener("wheel", onWheel);
+    };
   }, [bars, viewMode, tasks, toggleExpanded, router]);
 
   if (isLoading) {
