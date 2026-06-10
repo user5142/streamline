@@ -231,3 +231,9 @@ Prompts are recorded in order. Each entry includes the user's input and the mode
 > Please update the Profile name display at bottom of sidebar in app. This should display user name, not user email. And also, make sure the pop up menu that opens when user clicks on their profile is fully displayed over all elements, currently it seems the right edge of the pop up menu is getting hidden behind the main dashboard ui screen.
 
 ---
+
+**Model:** Cursor Auto
+
+> Please help me implement the following: need a way to add Members to a Team, without the member having created their own user account. This is so that Projects can be assigned to these members by other team  members/admins, in case that person is with an external third party partner/vendor, or just isn't using the Streamline tool. Lmk any questions on this.
+
+---

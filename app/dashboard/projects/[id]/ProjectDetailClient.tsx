@@ -6,9 +6,8 @@ import { createClient } from "@/libs/supabase/client";
 import { getErrorMessage } from "@/libs/getErrorMessage";
 import { PROJECT_STATUSES } from "@/libs/status";
 import toast from "react-hot-toast";
+import { memberDisplayLabel, type OrgMember } from "@/libs/orgMember";
 import type { Project, Team } from "@/types/database";
-
-type OrgMember = { id: string; full_name: string | null; email: string | null };
 
 // Editable project detail. The project's assigned members (PRJ-02) are derived
 // from task assignees and shown in the Tasks section (rendered below this form
@@ -140,7 +139,7 @@ export default function ProjectDetailClient({
               <option value="">— None —</option>
               {members.map((m) => (
                 <option key={m.id} value={m.id}>
-                  {m.full_name || m.email || "Unknown"}
+                  {memberDisplayLabel(m)}
                 </option>
               ))}
             </select>

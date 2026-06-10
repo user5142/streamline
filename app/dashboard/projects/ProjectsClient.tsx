@@ -10,9 +10,8 @@ import {
   projectStatusBadgeClass,
 } from "@/libs/status";
 import toast from "react-hot-toast";
+import { memberDisplayLabel, type OrgMember } from "@/libs/orgMember";
 import type { Project, Team } from "@/types/database";
-
-type OrgMember = { id: string; full_name: string | null; email: string | null };
 
 export default function ProjectsClient({ orgId }: { orgId: string }) {
   const supabase = createClient();
@@ -43,7 +42,7 @@ export default function ProjectsClient({ orgId }: { orgId: string }) {
       supabase.from("teams").select("*").order("name"),
       supabase
         .from("profiles")
-        .select("id, full_name, email")
+        .select("id, full_name, email, is_external")
         .order("full_name"),
     ]);
 
@@ -54,7 +53,12 @@ export default function ProjectsClient({ orgId }: { orgId: string }) {
     } else {
       setProjects((p.data as Project[]) ?? []);
       setTeams((t.data as Team[]) ?? []);
-      setMembers((m.data as OrgMember[]) ?? []);
+      setMembers(
+        ((m.data as OrgMember[]) ?? []).map((member) => ({
+          ...member,
+          is_external: member.is_external ?? false,
+        }))
+      );
     }
     setIsLoading(false);
   }, [supabase]);
@@ -69,7 +73,7 @@ export default function ProjectsClient({ orgId }: { orgId: string }) {
   const memberName = (id: string | null): string => {
     if (!id) return "—";
     const m = members.find((x) => x.id === id);
-    return m ? m.full_name || m.email || "Unknown" : "—";
+    return m ? memberDisplayLabel(m) : "—";
   };
 
   const resetForm = () => {
@@ -194,7 +198,7 @@ export default function ProjectsClient({ orgId }: { orgId: string }) {
                     <option value="">— None —</option>
                     {members.map((m) => (
                       <option key={m.id} value={m.id}>
-                        {m.full_name || m.email || "Unknown"}
+                        {memberDisplayLabel(m)}
                       </option>
                     ))}
                   </select>

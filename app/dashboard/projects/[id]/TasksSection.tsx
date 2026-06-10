@@ -8,15 +8,15 @@ import {
   taskStatusLabel,
   taskStatusBadgeClass,
 } from "@/libs/status";
+import { memberDisplayLabel, type OrgMember } from "@/libs/orgMember";
 import toast from "react-hot-toast";
 import type { Task, ActionItem } from "@/types/database";
 
-type OrgMember = { id: string; full_name: string | null; email: string | null };
 type Assignee = { task_id: string; profile_id: string };
 
 const memberName = (members: OrgMember[], id: string): string => {
   const m = members.find((x) => x.id === id);
-  return m ? m.full_name || m.email || "Unknown" : "Unknown";
+  return m ? memberDisplayLabel(m) : "Unknown";
 };
 
 // Tasks within a project (TSK-01..TSK-04) plus action-item checklists (TSK-02).
@@ -361,7 +361,7 @@ export default function TasksSection({
                         checked={newAssignees.includes(m.id)}
                         onChange={() => toggleNewAssignee(m.id)}
                       />
-                      {m.full_name || m.email || "Unknown"}
+                      {memberDisplayLabel(m)}
                     </label>
                   ))}
                 </div>
@@ -508,7 +508,7 @@ export default function TasksSection({
                                     toggleTaskAssignee(task.id, m.id)
                                   }
                                 />
-                                {m.full_name || m.email || "Unknown"}
+                                {memberDisplayLabel(m)}
                               </label>
                             ))}
                           </div>

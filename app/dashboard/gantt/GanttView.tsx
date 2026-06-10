@@ -7,10 +7,9 @@ import "./frappe-gantt.vendor.css";
 import "./gantt.css";
 import { createClient } from "@/libs/supabase/client";
 import { getErrorMessage } from "@/libs/getErrorMessage";
+import { memberDisplayLabel, type OrgMember } from "@/libs/orgMember";
 import toast from "react-hot-toast";
 import type { Project, Task, Team } from "@/types/database";
-
-type OrgMember = { id: string; full_name: string | null; email: string | null };
 type Assignee = { task_id: string; profile_id: string };
 type ViewMode = "Day" | "Week" | "Month";
 
@@ -60,7 +59,7 @@ export default function GanttView() {
       supabase.from("teams").select("*").order("name"),
       supabase
         .from("profiles")
-        .select("id, full_name, email")
+        .select("id, full_name, email, is_external")
         .order("full_name"),
       supabase.from("task_assignees").select("task_id, profile_id"),
     ]);
@@ -73,7 +72,12 @@ export default function GanttView() {
       setProjects((p.data as Project[]) ?? []);
       setTasks((t.data as Task[]) ?? []);
       setTeams((tm.data as Team[]) ?? []);
-      setMembers((m.data as OrgMember[]) ?? []);
+      setMembers(
+        ((m.data as OrgMember[]) ?? []).map((member) => ({
+          ...member,
+          is_external: member.is_external ?? false,
+        }))
+      );
       setAssignees((a.data as Assignee[]) ?? []);
     }
     setIsLoading(false);
@@ -251,7 +255,7 @@ export default function GanttView() {
             <option value="">Everyone</option>
             {members.map((m) => (
               <option key={m.id} value={m.id}>
-                {m.full_name || m.email || "Unknown"}
+                {memberDisplayLabel(m)}
               </option>
             ))}
           </select>

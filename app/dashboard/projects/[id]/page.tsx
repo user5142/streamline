@@ -20,7 +20,10 @@ export default async function ProjectPage({
   const [projectRes, teamsRes, membersRes] = await Promise.all([
     supabase.from("projects").select("*").eq("id", id).maybeSingle(),
     supabase.from("teams").select("*").order("name"),
-    supabase.from("profiles").select("id, full_name, email").order("full_name"),
+    supabase
+      .from("profiles")
+      .select("id, full_name, email, is_external")
+      .order("full_name"),
   ]);
 
   const project = projectRes.data as Project | null;
@@ -42,11 +45,15 @@ export default async function ProjectPage({
           project={project}
           teams={(teamsRes.data as Team[]) ?? []}
           members={
-            (membersRes.data as {
+            ((membersRes.data as {
               id: string;
               full_name: string | null;
               email: string | null;
-            }[]) ?? []
+              is_external: boolean;
+            }[]) ?? []).map((m) => ({
+              ...m,
+              is_external: m.is_external ?? false,
+            }))
           }
         />
 
@@ -54,11 +61,15 @@ export default async function ProjectPage({
           projectId={project.id}
           orgId={project.org_id}
           members={
-            (membersRes.data as {
+            ((membersRes.data as {
               id: string;
               full_name: string | null;
               email: string | null;
-            }[]) ?? []
+              is_external: boolean;
+            }[]) ?? []).map((m) => ({
+              ...m,
+              is_external: m.is_external ?? false,
+            }))
           }
         />
       </section>

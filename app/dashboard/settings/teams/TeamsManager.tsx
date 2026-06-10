@@ -3,14 +3,15 @@
 import { useState, useEffect, useCallback, FormEvent } from "react";
 import { createClient } from "@/libs/supabase/client";
 import { getErrorMessage } from "@/libs/getErrorMessage";
+import {
+  memberDisplayLabel,
+  memberLabel,
+  type OrgMember,
+} from "@/libs/orgMember";
 import toast from "react-hot-toast";
 import type { Team } from "@/types/database";
 
-type OrgMember = { id: string; full_name: string | null; email: string | null };
 type Membership = { team_id: string; profile_id: string };
-
-const memberLabel = (m: OrgMember): string =>
-  m.full_name || m.email || "Unknown user";
 
 export default function TeamsManager({ orgId }: { orgId: string }) {
   const supabase = createClient();
@@ -21,15 +22,18 @@ export default function TeamsManager({ orgId }: { orgId: string }) {
   const [selectedTeamId, setSelectedTeamId] = useState<string | null>(null);
   const [newTeamName, setNewTeamName] = useState<string>("");
   const [renameValue, setRenameValue] = useState<string>("");
+  const [externalName, setExternalName] = useState<string>("");
+  const [externalEmail, setExternalEmail] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isCreating, setIsCreating] = useState<boolean>(false);
+  const [isAddingExternal, setIsAddingExternal] = useState<boolean>(false);
 
   const loadAll = useCallback(async () => {
     const [teamsRes, membersRes, mRes] = await Promise.all([
       supabase.from("teams").select("*").order("name"),
       supabase
         .from("profiles")
-        .select("id, full_name, email")
+        .select("id, full_name, email, is_external")
         .order("full_name"),
       supabase.from("team_members").select("team_id, profile_id"),
     ]);
@@ -40,7 +44,12 @@ export default function TeamsManager({ orgId }: { orgId: string }) {
       toast.error("Could not load teams.");
     } else {
       setTeams((teamsRes.data as Team[]) ?? []);
-      setMembers((membersRes.data as OrgMember[]) ?? []);
+      setMembers(
+        ((membersRes.data as OrgMember[]) ?? []).map((m) => ({
+          ...m,
+          is_external: m.is_external ?? false,
+        }))
+      );
       setMemberships((mRes.data as Membership[]) ?? []);
     }
     setIsLoading(false);
@@ -51,6 +60,9 @@ export default function TeamsManager({ orgId }: { orgId: string }) {
   }, [loadAll]);
 
   const selectedTeam = teams.find((t) => t.id === selectedTeamId) ?? null;
+
+  const accountMembers = members.filter((m) => !m.is_external);
+  const externalMembers = members.filter((m) => m.is_external);
 
   const isMemberOfSelected = (profileId: string): boolean =>
     !!selectedTeamId &&
@@ -172,6 +184,99 @@ export default function TeamsManager({ orgId }: { orgId: string }) {
     }
   };
 
+  const handleAddExternal = async (e: FormEvent) => {
+    e.preventDefault();
+    if (!externalName.trim()) return;
+    setIsAddingExternal(true);
+    try {
+      const { data, error } = await supabase.rpc("create_external_member", {
+        p_full_name: externalName.trim(),
+        p_email: externalEmail.trim() || null,
+      });
+      if (error) throw error;
+
+      const created = data as OrgMember;
+      const withFlag = { ...created, is_external: true };
+      setMembers((prev) =>
+        [...prev, withFlag].sort((a, b) =>
+          memberLabel(a).localeCompare(memberLabel(b))
+        )
+      );
+      setExternalName("");
+      setExternalEmail("");
+
+      if (selectedTeamId) {
+        const { error: memberError } = await supabase
+          .from("team_members")
+          .insert({ team_id: selectedTeamId, profile_id: created.id });
+        if (memberError) throw memberError;
+        setMemberships((prev) => [
+          ...prev,
+          { team_id: selectedTeamId, profile_id: created.id },
+        ]);
+      }
+
+      toast.success(
+        selectedTeam
+          ? `"${memberLabel(withFlag)}" added and assigned to ${selectedTeam.name}.`
+          : `"${memberLabel(withFlag)}" added to your organization.`
+      );
+    } catch (error) {
+      console.error("add external member failed:", getErrorMessage(error), error);
+      toast.error(getErrorMessage(error));
+    } finally {
+      setIsAddingExternal(false);
+    }
+  };
+
+  const handleDeleteExternal = async (member: OrgMember) => {
+    if (
+      !window.confirm(
+        `Remove "${memberLabel(member)}"? They will be removed from all teams and task assignments.`
+      )
+    ) {
+      return;
+    }
+    try {
+      const { error } = await supabase.rpc("delete_external_member", {
+        p_profile_id: member.id,
+      });
+      if (error) throw error;
+
+      setMembers((prev) => prev.filter((m) => m.id !== member.id));
+      setMemberships((prev) => prev.filter((m) => m.profile_id !== member.id));
+      toast.success("External member removed.");
+    } catch (error) {
+      console.error("delete external member failed:", getErrorMessage(error), error);
+      toast.error(getErrorMessage(error));
+    }
+  };
+
+  const renderMemberRow = (m: OrgMember, showDelete: boolean) => (
+    <li key={m.id} className="flex items-center gap-3 py-1">
+      <label className="flex flex-1 items-center gap-3 cursor-pointer min-w-0">
+        <input
+          type="checkbox"
+          className="checkbox checkbox-sm shrink-0"
+          checked={isMemberOfSelected(m.id)}
+          disabled={!selectedTeamId}
+          onChange={() => toggleMembership(m.id)}
+        />
+        <span className="text-sm truncate">{memberDisplayLabel(m)}</span>
+      </label>
+      {showDelete && (
+        <button
+          type="button"
+          className="btn btn-ghost btn-xs text-error shrink-0"
+          onClick={() => handleDeleteExternal(m)}
+          aria-label={`Remove ${memberLabel(m)}`}
+        >
+          Remove
+        </button>
+      )}
+    </li>
+  );
+
   if (isLoading) {
     return (
       <div className="flex justify-center py-12">
@@ -266,27 +371,66 @@ export default function TeamsManager({ orgId }: { orgId: string }) {
                 </button>
               </div>
 
-              <div className="divider my-2">Members</div>
+              <div className="divider my-2">Members with accounts</div>
+              <p className="text-xs text-base-content/60 -mt-2 mb-2">
+                Teammates who have signed up and joined your organization.
+              </p>
 
-              {members.length === 0 ? (
+              {accountMembers.length === 0 ? (
                 <p className="text-sm text-base-content/60">
-                  No members in your organization yet.
+                  No signed-in members yet. Invite teammates from Settings, or
+                  add external members below.
                 </p>
               ) : (
-                <ul className="space-y-1 max-h-80 overflow-y-auto">
-                  {members.map((m) => (
-                    <li key={m.id}>
-                      <label className="flex items-center gap-3 cursor-pointer py-1">
-                        <input
-                          type="checkbox"
-                          className="checkbox checkbox-sm"
-                          checked={isMemberOfSelected(m.id)}
-                          onChange={() => toggleMembership(m.id)}
-                        />
-                        <span className="text-sm">{memberLabel(m)}</span>
-                      </label>
-                    </li>
-                  ))}
+                <ul className="space-y-1 max-h-48 overflow-y-auto">
+                  {accountMembers.map((m) => renderMemberRow(m, false))}
+                </ul>
+              )}
+
+              <div className="divider my-2">External members</div>
+              <p className="text-xs text-base-content/60 -mt-2 mb-3">
+                Add vendors, partners, or others who are not using Streamline.
+                They can be assigned to projects and tasks but cannot sign in.
+                {selectedTeam
+                  ? ` New external members are added to ${selectedTeam.name} automatically.`
+                  : ""}
+              </p>
+
+              <form onSubmit={handleAddExternal} className="flex flex-wrap gap-2 mb-4">
+                <input
+                  type="text"
+                  value={externalName}
+                  placeholder="Name *"
+                  className="input input-bordered input-sm flex-1 min-w-[8rem]"
+                  onChange={(e) => setExternalName(e.target.value)}
+                  required
+                />
+                <input
+                  type="email"
+                  value={externalEmail}
+                  placeholder="Email (optional)"
+                  className="input input-bordered input-sm flex-1 min-w-[8rem]"
+                  onChange={(e) => setExternalEmail(e.target.value)}
+                />
+                <button
+                  type="submit"
+                  className="btn btn-primary btn-sm"
+                  disabled={isAddingExternal || !externalName.trim()}
+                >
+                  {isAddingExternal && (
+                    <span className="loading loading-spinner loading-xs"></span>
+                  )}
+                  Add external
+                </button>
+              </form>
+
+              {externalMembers.length === 0 ? (
+                <p className="text-sm text-base-content/60">
+                  No external members yet.
+                </p>
+              ) : (
+                <ul className="space-y-1 max-h-48 overflow-y-auto">
+                  {externalMembers.map((m) => renderMemberRow(m, true))}
                 </ul>
               )}
             </>

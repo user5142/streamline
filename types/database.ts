@@ -29,6 +29,8 @@ export interface Profile {
   full_name: string | null;
   org_id: string | null;
   role: Role;
+  /** Placeholder for vendors/partners who do not have a Streamline login. */
+  is_external: boolean;
   created_at: string;
 }
 
