@@ -237,3 +237,29 @@ Prompts are recorded in order. Each entry includes the user's input and the mode
 > Please help me implement the following: need a way to add Members to a Team, without the member having created their own user account. This is so that Projects can be assigned to these members by other team  members/admins, in case that person is with an external third party partner/vendor, or just isn't using the Streamline tool. Lmk any questions on this.
 
 ---
+
+**Model:** Cursor Auto
+
+> Getting the following error when attempting to navigate into a specific project from the Projects page: 
+
+Error: Cannot find module './vendor-chunks/@react-aria.js'
+Require stack:
+- C:\Users\bhatch\Documents\Apps\streamline-2\.next\server\webpack-runtime.js
+- C:\Users\bhatch\Documents\Apps\streamline-2\.next\server\app\dashboard\projects\[id]\page.js
+- C:\Users\bhatch\Documents\Apps\streamline-2\node_modules\next\dist\server\require.js
+- C:\Users\bhatch\Documents\Apps\streamline-2\node_modules\next\dist\server\load-components.js
+- C:\Users\bhatch\Documents\Apps\streamline-2\node_modules\next\dist\build\utils.js
+- C:\Users\bhatch\Documents\Apps\streamline-2\node_modules\next\dist\server\dev\static-paths-worker.js
+- C:\Users\bhatch\Documents\Apps\streamline-2\node_modules\next\dist\compiled\jest-worker\processChild.js
+    at Module.<anonymous> (node:internal/modules/cjs/loader:1448:15)
+    at <unknown> (file://C:\Users\bhatch\Documents\Apps\streamline-2\node_modules\next\dist\server\require-hook.js:57:36)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1059:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1064:22)
+    at Module._load (node:internal/modules/cjs/loader:1234:25)
+    at TracingChannel.traceSync (node:diagnostics_channel:328:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:245:24)
+    at Module.<anonymous> (node:internal/modules/cjs/loader:1548:12)
+    at mod.require (file://C:\Users\bhatch\Documents\Apps\streamline-2\node_modules\next\dist\server\require-hook.js:68:28)
+    at require (node:internal/modules/helpers:152:16)
+
+---
