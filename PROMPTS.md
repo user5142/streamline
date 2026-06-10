@@ -303,3 +303,9 @@ Require stack:
 > Build Failed
 > Vulnerable version of Next.js detected, please update immediately.
 > Further details: https://vercel.com/kb/bulletin/react2shell
+
+---
+
+**Model:** Claude Opus 4.8
+
+> Please add Start Date to the Projects page. Also, on the Project detail view, display Start date as Start Date, Target completion as Target Completion and Actual completion as Actual Completion

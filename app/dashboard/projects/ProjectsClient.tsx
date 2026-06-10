@@ -298,6 +298,7 @@ export default function ProjectsClient({ orgId }: { orgId: string }) {
                 <th>Team</th>
                 <th>Owner</th>
                 <th>Status</th>
+                <th>Start Date</th>
                 <th>Target</th>
                 <th>Actual</th>
               </tr>
@@ -321,6 +322,11 @@ export default function ProjectsClient({ orgId }: { orgId: string }) {
                     >
                       {projectStatusLabel(p.status)}
                     </span>
+                  </td>
+                  <td className="text-sm">
+                    {p.start_date
+                      ? new Date(p.start_date).toLocaleDateString()
+                      : "—"}
                   </td>
                   <td className="text-sm">
                     {p.target_completion_date

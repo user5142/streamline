@@ -192,7 +192,7 @@ export default function ProjectDetailClient({
             />
           </label>
           <label className="form-control">
-            <span className="label-text mb-1">Start date</span>
+            <span className="label-text mb-1">Start Date</span>
             <input
               type="date"
               value={startDate}
@@ -201,7 +201,7 @@ export default function ProjectDetailClient({
             />
           </label>
           <label className="form-control">
-            <span className="label-text mb-1">Target completion</span>
+            <span className="label-text mb-1">Target Completion</span>
             <input
               type="date"
               value={targetDate}
@@ -210,7 +210,7 @@ export default function ProjectDetailClient({
             />
           </label>
           <label className="form-control">
-            <span className="label-text mb-1">Actual completion</span>
+            <span className="label-text mb-1">Actual Completion</span>
             <input
               type="date"
               value={actualDate}
