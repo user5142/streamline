@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useState, FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/libs/supabase/client";
@@ -121,29 +122,33 @@ export default function Login() {
    * ------------------------------------------------------------------- */
 
   return (
-    <main className="p-8 md:p-24" data-theme={config.colors.theme}>
-      <div className="text-center mb-4">
-        <Link href="/" className="btn btn-ghost btn-sm">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 20 20"
-            fill="currentColor"
-            className="w-5 h-5"
-          >
-            <path
-              fillRule="evenodd"
-              d="M15 10a.75.75 0 01-.75.75H7.612l2.158 1.96a.75.75 0 11-1.04 1.08l-3.5-3.25a.75.75 0 010-1.08l3.5-3.25a.75.75 0 111.04 1.08L7.612 9.25h6.638A.75.75 0 0115 10z"
-              clipRule="evenodd"
+    <main
+      className="flex min-h-screen flex-col items-center justify-center bg-base-200 px-6 py-12"
+      data-theme={config.colors.theme}
+    >
+      <div className="w-full max-w-md">
+        <div className="mb-8 flex flex-col items-center">
+          <Link href="/" title={`${config.appName} home`}>
+            <Image
+              src="/streamline-logo.svg"
+              alt={`${config.appName} logo`}
+              width={185}
+              height={28}
+              className="h-7 w-auto"
+              priority
             />
-          </svg>
-          Home
-        </Link>
-      </div>
-      <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight text-center mb-12">
-        {mode === "signup" ? "Sign up for" : "Sign in to"} {config.appName}
-      </h1>
+          </Link>
+          <h1 className="mt-8 text-center font-display text-2xl font-bold tracking-tight md:text-3xl">
+            {mode === "signup" ? "Create your account" : "Welcome back"}
+          </h1>
+          <p className="mt-2 text-center text-sm text-base-content/60">
+            {mode === "signup"
+              ? `Start managing projects with ${config.appName}.`
+              : `Sign in to your ${config.appName} workspace.`}
+          </p>
+        </div>
 
-      <div className="space-y-8 max-w-xl mx-auto">
+        <div className="space-y-6 rounded-2xl border border-base-300 bg-base-100 p-6 shadow-[var(--shadow-soft)] sm:p-8">
         {/* -------------------------------------------------------------
           * DISABLED FOR MVP — Google OAuth button. Uncomment to restore.
           *
@@ -213,30 +218,40 @@ export default function Login() {
           * </form>
           * ----------------------------------------------------------- */}
 
-        <p className="text-center text-sm text-base-content/70">
-          {mode === "signup" ? (
-            <>
-              Already have an account?{" "}
-              <button
-                type="button"
-                className="link link-primary"
-                onClick={() => setMode("signin")}
-              >
-                Sign in
-              </button>
-            </>
-          ) : (
-            <>
-              Don&apos;t have an account?{" "}
-              <button
-                type="button"
-                className="link link-primary"
-                onClick={() => setMode("signup")}
-              >
-                Sign up
-              </button>
-            </>
-          )}
+          <p className="text-center text-sm text-base-content/70">
+            {mode === "signup" ? (
+              <>
+                Already have an account?{" "}
+                <button
+                  type="button"
+                  className="link link-primary font-medium no-underline hover:underline"
+                  onClick={() => setMode("signin")}
+                >
+                  Sign in
+                </button>
+              </>
+            ) : (
+              <>
+                Don&apos;t have an account?{" "}
+                <button
+                  type="button"
+                  className="link link-primary font-medium no-underline hover:underline"
+                  onClick={() => setMode("signup")}
+                >
+                  Sign up
+                </button>
+              </>
+            )}
+          </p>
+        </div>
+
+        <p className="mt-6 text-center text-sm">
+          <Link
+            href="/"
+            className="text-base-content/50 transition-colors hover:text-primary"
+          >
+            ← Back to home
+          </Link>
         </p>
       </div>
     </main>

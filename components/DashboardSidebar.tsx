@@ -140,8 +140,11 @@ const DashboardSidebar = ({ isAdmin }: { isAdmin: boolean }) => {
         />
       </Link>
 
-      <nav className="flex-1 overflow-y-auto px-3 py-2">
-        <ul className="menu gap-1 w-full">
+      <nav className="flex-1 overflow-y-auto px-3 py-3">
+        <p className="px-3 pb-2 text-[0.65rem] font-semibold uppercase tracking-[0.12em] text-base-content/40">
+          Workspace
+        </p>
+        <ul className="flex w-full flex-col gap-1">
           {items.map((item) => {
             const isActive =
               pathname === item.href || pathname.startsWith(`${item.href}/`);
@@ -151,8 +154,10 @@ const DashboardSidebar = ({ isAdmin }: { isAdmin: boolean }) => {
                   href={item.href}
                   onClick={closeDrawer}
                   aria-current={isActive ? "page" : undefined}
-                  className={`flex items-center gap-3 font-medium ${
-                    isActive ? "active" : ""
+                  className={`flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
+                    isActive
+                      ? "bg-primary/10 text-primary"
+                      : "text-base-content/70 hover:bg-base-100 hover:text-base-content"
                   }`}
                 >
                   {item.icon}

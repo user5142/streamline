@@ -32,23 +32,31 @@ export default async function MyTasksPage() {
   const tasks = (data as unknown as MyTask[]) ?? [];
 
   return (
-    <main className="min-h-screen p-8 pb-24">
-      <section className="max-w-4xl mx-auto space-y-8">
+    <main className="min-h-screen p-6 pb-24 lg:p-8">
+      <section className="mx-auto max-w-4xl space-y-8">
         <div>
-          <h1 className="text-3xl md:text-4xl font-extrabold">Tasks</h1>
-          <p className="text-sm text-base-content/70 mt-1">
+          <h1 className="font-display text-3xl font-bold tracking-tight md:text-4xl">
+            Tasks
+          </h1>
+          <p className="mt-1 text-sm text-base-content/60">
             Tasks assigned to you across all projects.
           </p>
         </div>
 
         {tasks.length === 0 ? (
-          <p className="text-sm text-base-content/60 py-6 text-center">
-            You have no assigned tasks.
-          </p>
+          <div className="rounded-2xl border border-dashed border-base-300 bg-base-100 px-6 py-16 text-center">
+            <p className="font-display text-lg font-semibold text-base-content">
+              You&apos;re all clear
+            </p>
+            <p className="mx-auto mt-1 max-w-sm text-sm text-base-content/60">
+              Tasks assigned to you will show up here once they&apos;re created
+              on a project.
+            </p>
+          </div>
         ) : (
-          <div className="overflow-x-auto">
+          <div className="overflow-hidden rounded-2xl border border-base-300 bg-base-100">
             <table className="table">
-              <thead>
+              <thead className="bg-base-200 text-xs uppercase tracking-wide text-base-content/50">
                 <tr>
                   <th>Task</th>
                   <th>Project</th>

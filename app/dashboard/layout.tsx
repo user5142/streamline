@@ -62,7 +62,7 @@ export default async function LayoutPrivate({
               />
             </svg>
           </label>
-          <span className="font-extrabold">{config.appName}</span>
+          <span className="font-display font-bold">{config.appName}</span>
         </div>
 
         {children}

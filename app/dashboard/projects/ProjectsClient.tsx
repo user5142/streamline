@@ -128,12 +128,29 @@ export default function ProjectsClient({ orgId }: { orgId: string }) {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-end">
+      <div className="flex items-center justify-between gap-4">
+        <p className="text-sm text-base-content/60">
+          {projects.length} {projects.length === 1 ? "project" : "projects"}
+        </p>
         <button
           className="btn btn-primary"
           onClick={() => setShowCreate((v) => !v)}
         >
-          {showCreate ? "Cancel" : "New project"}
+          {showCreate ? (
+            "Cancel"
+          ) : (
+            <>
+              <svg
+                viewBox="0 0 20 20"
+                fill="currentColor"
+                className="h-5 w-5"
+                aria-hidden="true"
+              >
+                <path d="M10.75 4.75a.75.75 0 0 0-1.5 0v4.5h-4.5a.75.75 0 0 0 0 1.5h4.5v4.5a.75.75 0 0 0 1.5 0v-4.5h4.5a.75.75 0 0 0 0-1.5h-4.5v-4.5Z" />
+              </svg>
+              New project
+            </>
+          )}
         </button>
       </div>
 
@@ -254,13 +271,24 @@ export default function ProjectsClient({ orgId }: { orgId: string }) {
       )}
 
       {projects.length === 0 ? (
-        <p className="text-sm text-base-content/60 py-6 text-center">
-          No projects yet. Create your first one.
-        </p>
+        <div className="rounded-2xl border border-dashed border-base-300 bg-base-100 px-6 py-16 text-center">
+          <p className="font-display text-lg font-semibold text-base-content">
+            No projects yet
+          </p>
+          <p className="mx-auto mt-1 max-w-sm text-sm text-base-content/60">
+            Create your first project to start tracking work on the timeline.
+          </p>
+          <button
+            className="btn btn-primary mt-5"
+            onClick={() => setShowCreate(true)}
+          >
+            New project
+          </button>
+        </div>
       ) : (
-        <div className="overflow-x-auto">
+        <div className="overflow-hidden rounded-2xl border border-base-300 bg-base-100">
           <table className="table">
-            <thead>
+            <thead className="bg-base-200 text-xs uppercase tracking-wide text-base-content/50">
               <tr>
                 <th>Name</th>
                 <th>Team</th>

@@ -10,10 +10,15 @@ export default async function ProjectsPage() {
   if (!profile?.org_id) return null;
 
   return (
-    <main className="min-h-screen p-8 pb-24">
-      <section className="max-w-5xl mx-auto space-y-8">
+    <main className="min-h-screen p-6 pb-24 lg:p-8">
+      <section className="mx-auto max-w-5xl space-y-8">
         <div>
-          <h1 className="text-3xl md:text-4xl font-extrabold">Projects</h1>
+          <h1 className="font-display text-3xl font-bold tracking-tight md:text-4xl">
+            Projects
+          </h1>
+          <p className="mt-1 text-sm text-base-content/60">
+            Every project in your org, with owner, team, and target date.
+          </p>
         </div>
 
         <ProjectsClient orgId={profile.org_id} />

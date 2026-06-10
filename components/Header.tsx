@@ -12,13 +12,13 @@ const links: {
   href: string;
   label: string;
 }[] = [
-  // {
-  //   href: "/#pricing",
-  //   label: "Pricing",
-  // },
   {
-    href: "/#testimonials",
-    label: "Reviews",
+    href: "/#features",
+    label: "Features",
+  },
+  {
+    href: "/#how-it-works",
+    label: "How it works",
   },
   {
     href: "/#faq",
@@ -40,9 +40,9 @@ const Header = () => {
   }, [searchParams]);
 
   return (
-    <header className="bg-base-200">
+    <header className="sticky top-0 z-50 border-b border-base-300/80 bg-base-100/80 backdrop-blur-md">
       <nav
-        className="container flex items-center justify-between px-8 py-4 mx-auto"
+        className="container flex items-center justify-between px-6 py-3.5 mx-auto lg:px-8"
         aria-label="Global"
       >
         {/* Your logo/name on large screens */}
@@ -88,12 +88,12 @@ const Header = () => {
         </div>
 
         {/* Your links on large screens */}
-        <div className="hidden lg:flex lg:justify-center lg:gap-12 lg:items-center">
+        <div className="hidden lg:flex lg:justify-center lg:gap-10 lg:items-center">
           {links.map((link) => (
             <Link
               href={link.href}
               key={link.href}
-              className="link link-hover"
+              className="text-sm font-medium text-base-content/70 transition-colors hover:text-primary"
               title={link.label}
             >
               {link.label}
@@ -102,7 +102,15 @@ const Header = () => {
         </div>
 
         {/* CTA on large screens */}
-        <div className="hidden lg:flex lg:justify-end lg:flex-1">{cta}</div>
+        <div className="hidden lg:flex lg:justify-end lg:flex-1 lg:items-center lg:gap-2">
+          <Link
+            href={config.auth.loginUrl}
+            className="btn btn-ghost btn-sm text-base-content/70 hover:text-primary"
+          >
+            Sign in
+          </Link>
+          {cta}
+        </div>
       </nav>
 
       {/* Mobile menu, show/hide based on menu state. */}
@@ -152,12 +160,12 @@ const Header = () => {
           {/* Your links on small screens */}
           <div className="flow-root mt-6">
             <div className="py-4">
-              <div className="flex flex-col gap-y-4 items-start">
+              <div className="flex flex-col gap-y-1 items-stretch">
                 {links.map((link) => (
                   <Link
                     href={link.href}
                     key={link.href}
-                    className="link link-hover"
+                    className="rounded-lg px-3 py-2 text-base font-medium text-base-content/80 transition-colors hover:bg-base-200 hover:text-primary"
                     title={link.label}
                   >
                     {link.label}
@@ -167,7 +175,15 @@ const Header = () => {
             </div>
             <div className="divider"></div>
             {/* Your CTA on small screens */}
-            <div className="flex flex-col">{cta}</div>
+            <div className="flex flex-col gap-2">
+              <Link
+                href={config.auth.loginUrl}
+                className="btn btn-ghost btn-block"
+              >
+                Sign in
+              </Link>
+              <ButtonSignin extraStyle="btn-primary btn-block" />
+            </div>
           </div>
         </div>
       </div>

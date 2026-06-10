@@ -1,145 +1,121 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState } from "react";
 import type { JSX } from "react";
-import Image from "next/image";
+import AppPreview, { ScreenshotFrame } from "./AppPreview";
 
 interface Feature {
   title: string;
   description: string;
-  type?: "video" | "image";
-  path?: string;
-  format?: string;
-  alt?: string;
-  svg?: JSX.Element;
+  // What shows in the media panel: the live Gantt mock, or a labeled
+  // screenshot placeholder to swap for a real capture later.
+  preview: "gantt" | string;
+  svg: JSX.Element;
 }
 
-// The features array is a list of features that will be displayed in the accordion.
-// - title: The title of the feature
-// - description: The description of the feature (when clicked)
-// - type: The type of media (video or image)
-// - path: The path to the media (for better SEO, try to use a local path)
-// - format: The format of the media (if type is 'video')
-// - alt: The alt text of the image (if type is 'image')
-const features = [
+const features: Feature[] = [
   {
     title: "Company-wide Gantt",
     description:
       "See every active project across your org on one timeline. Filter by team or by person, and expand any project to view its tasks as sub-bars — powered by Frappe Gantt.",
+    preview: "gantt",
     svg: (
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        fill="none"
-        viewBox="0 0 24 24"
-        strokeWidth={1.5}
-        stroke="currentColor"
-        className="w-6 h-6"
-      >
-        <path
-          strokeLinecap="round"
-          d="M16.5 12a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0zm0 0c0 1.657 1.007 3 2.25 3S21 13.657 21 12a9 9 0 10-2.636 6.364M16.5 12V8.25"
-        />
-      </svg>
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M3.75 6.75h10.5M3.75 12h13.5M3.75 17.25h7.5"
+      />
     ),
   },
   {
     title: "Projects & tasks",
     description:
       "Create projects with an owner, team, and target dates, then break them into tasks with assignees and due dates. Track status independently at every level, right down to checklist-style action items.",
-    type: "image",
-    path: "https://images.unsplash.com/photo-1571171637578-41bc2dd41cd2?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=3540&q=80",
-    alt: "Project board",
+    preview: "Projects & tasks",
     svg: (
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        fill="none"
-        viewBox="0 0 24 24"
-        strokeWidth={1.5}
-        stroke="currentColor"
-        className="w-6 h-6"
-      >
-        <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5z"
-        />
-      </svg>
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
+      />
     ),
   },
   {
     title: "Teams & people",
     description:
       "Organize your org into teams like Engineering, Marketing, or Operations. Assign projects to teams and tasks to the right people, so the Gantt filters cleanly by either.",
+    preview: "Teams & people",
     svg: (
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        fill="none"
-        viewBox="0 0 24 24"
-        strokeWidth={1.5}
-        stroke="currentColor"
-        className="w-6 h-6"
-      >
-        <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          d="M17.982 18.725A7.488 7.488 0 0012 15.75a7.488 7.488 0 00-5.982 2.975m11.963 0a9 9 0 10-11.963 0m11.963 0A8.966 8.966 0 0112 21a8.966 8.966 0 01-5.982-2.275M15 9.75a3 3 0 11-6 0 3 3 0 016 0z"
-        />
-      </svg>
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M17.982 18.725A7.488 7.488 0 0 0 12 15.75a7.488 7.488 0 0 0-5.982 2.975m11.963 0a9 9 0 1 0-11.963 0m11.963 0A8.966 8.966 0 0 1 12 21a8.966 8.966 0 0 1-5.982-2.275M15 9.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"
+      />
     ),
   },
   {
     title: "Invite by link",
     description:
       "Add teammates in seconds with a single, secure invite link. No email setup required — share it on Slack or anywhere else, and links expire after 7 days for safety.",
+    preview: "Invite teammates",
     svg: (
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        fill="none"
-        viewBox="0 0 24 24"
-        strokeWidth={1.5}
-        stroke="currentColor"
-        className="w-6 h-6"
-      >
-        <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          d="M9.53 16.122a3 3 0 00-5.78 1.128 2.25 2.25 0 01-2.4 2.245 4.5 4.5 0 008.4-2.245c0-.399-.078-.78-.22-1.128zm0 0a15.998 15.998 0 003.388-1.62m-5.043-.025a15.994 15.994 0 011.622-3.395m3.42 3.42a15.995 15.995 0 004.764-4.648l3.876-5.814a1.151 1.151 0 00-1.597-1.597L14.146 6.32a15.996 15.996 0 00-4.649 4.763m3.42 3.42a6.776 6.776 0 00-3.42-3.42"
-        />
-      </svg>
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M13.19 8.688a4.5 4.5 0 0 1 1.242 7.244l-4.5 4.5a4.5 4.5 0 0 1-6.364-6.364l1.757-1.757m13.35-.622 1.757-1.757a4.5 4.5 0 0 0-6.364-6.364l-4.5 4.5a4.5 4.5 0 0 0 1.242 7.244"
+      />
     ),
   },
-] as Feature[];
+];
 
-// An SEO-friendly accordion component including the title and a description (when clicked.)
 const Item = ({
   feature,
   isOpen,
   setFeatureSelected,
 }: {
-  index: number;
   feature: Feature;
   isOpen: boolean;
   setFeatureSelected: () => void;
 }) => {
-  const accordion = useRef(null);
   const { title, description, svg } = feature;
 
   return (
-    <li>
+    <li
+      className={`rounded-2xl border transition-colors duration-200 ${
+        isOpen
+          ? "border-base-300 bg-base-100 shadow-[var(--shadow-soft)]"
+          : "border-transparent hover:bg-base-100/60"
+      }`}
+    >
       <button
-        className="relative flex gap-2 items-center w-full py-5 text-base font-medium text-left md:text-lg"
+        className="flex w-full items-center gap-4 px-5 py-4 text-left"
         onClick={(e) => {
           e.preventDefault();
           setFeatureSelected();
         }}
         aria-expanded={isOpen}
       >
-        <span className={`duration-100 ${isOpen ? "text-primary" : ""}`}>
-          {svg}
+        <span
+          className={`grid h-10 w-10 shrink-0 place-items-center rounded-xl transition-colors duration-200 ${
+            isOpen
+              ? "bg-primary text-primary-content"
+              : "bg-base-200 text-base-content/60"
+          }`}
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            strokeWidth={1.7}
+            stroke="currentColor"
+            className="h-5 w-5"
+          >
+            {svg}
+          </svg>
         </span>
         <span
-          className={`flex-1 text-base-content ${
-            isOpen ? "text-primary font-semibold" : ""
+          className={`flex-1 font-display text-base font-semibold md:text-lg ${
+            isOpen ? "text-primary" : "text-base-content"
           }`}
         >
           <h3 className="inline">{title}</h3>
@@ -147,92 +123,60 @@ const Item = ({
       </button>
 
       <div
-        ref={accordion}
-        className={`transition-all duration-300 ease-in-out text-base-content-secondary overflow-hidden`}
-        style={
-          isOpen
-            ? { maxHeight: accordion?.current?.scrollHeight, opacity: 1 }
-            : { maxHeight: 0, opacity: 0 }
-        }
+        className="grid overflow-hidden transition-all duration-300 ease-in-out"
+        style={{
+          gridTemplateRows: isOpen ? "1fr" : "0fr",
+          opacity: isOpen ? 1 : 0,
+        }}
       >
-        <div className="pb-5 leading-relaxed">{description}</div>
+        <div className="min-h-0">
+          <p className="px-5 pb-5 pl-[4.75rem] text-[0.95rem] leading-relaxed text-base-content/70">
+            {description}
+          </p>
+        </div>
       </div>
     </li>
   );
 };
 
-// A component to display the media (video or image) of the feature. If the type is not specified, it will display an empty div.
-// Video are set to autoplay for best UX.
 const Media = ({ feature }: { feature: Feature }) => {
-  const { type, path, format, alt } = feature;
-  const style = "rounded-2xl aspect-square w-full sm:w-[26rem]";
-  const size = {
-    width: 500,
-    height: 500,
-  };
-
-  if (type === "video") {
-    return (
-      <video
-        className={style}
-        autoPlay
-        muted
-        loop
-        playsInline
-        controls
-        width={size.width}
-        height={size.height}
-      >
-        <source src={path} type={format} />
-      </video>
-    );
-  } else if (type === "image") {
-    return (
-      <Image
-        src={path}
-        alt={alt}
-        className={`${style} object-cover object-center`}
-        width={size.width}
-        height={size.height}
-      />
-    );
-  } else {
-    return <div className={`${style} !border-none`}></div>;
+  if (feature.preview === "gantt") {
+    return <AppPreview />;
   }
+  return <ScreenshotFrame label={feature.preview} />;
 };
 
-// A component to display 2 to 5 features in an accordion.
-// By default, the first feature is selected. When a feature is clicked, the others are closed.
 const FeaturesAccordion = () => {
   const [featureSelected, setFeatureSelected] = useState<number>(0);
 
   return (
-    <section
-      className="py-24 md:py-32 space-y-24 md:space-y-32 max-w-7xl mx-auto bg-base-100 "
-      id="features"
-    >
-      <div className="px-8">
-        <h2 className="font-extrabold text-4xl lg:text-6xl tracking-tight mb-12 md:mb-24">
-          Everything you need to keep projects on track
-          <span className="bg-neutral text-neutral-content px-2 md:px-4 ml-1 md:ml-1.5 leading-relaxed whitespace-nowrap">
-            in one view
-          </span>
-        </h2>
-        <div className=" flex flex-col md:flex-row gap-12 md:gap-24">
-          <div className="grid grid-cols-1 items-stretch gap-8 sm:gap-12 lg:grid-cols-2 lg:gap-20">
-            <ul className="w-full">
-              {features.map((feature, i) => (
-                <Item
-                  key={feature.title}
-                  index={i}
-                  feature={feature}
-                  isOpen={featureSelected === i}
-                  setFeatureSelected={() => setFeatureSelected(i)}
-                />
-              ))}
-            </ul>
+    <section className="bg-base-200" id="features">
+      <div className="mx-auto max-w-7xl px-6 py-20 lg:px-8 lg:py-28">
+        <div className="max-w-2xl">
+          <span className="eyebrow">Everything in one place</span>
+          <h2 className="mt-5 font-display text-3xl font-bold tracking-tight text-base-content sm:text-4xl lg:text-5xl">
+            Everything you need to keep projects on track
+          </h2>
+          <p className="mt-5 text-lg leading-relaxed text-base-content/70">
+            The essentials, nothing you&apos;ll never use. Plan the work, assign
+            it, and watch it move — all from one timeline.
+          </p>
+        </div>
 
-            <Media feature={features[featureSelected]} key={featureSelected} />
+        <div className="mt-12 grid items-center gap-10 lg:mt-16 lg:grid-cols-2 lg:gap-16">
+          <ul className="flex flex-col gap-1">
+            {features.map((feature, i) => (
+              <Item
+                key={feature.title}
+                feature={feature}
+                isOpen={featureSelected === i}
+                setFeatureSelected={() => setFeatureSelected(i)}
+              />
+            ))}
+          </ul>
+
+          <div key={featureSelected} className="animate-opacity lg:pl-4">
+            <Media feature={features[featureSelected]} />
           </div>
         </div>
       </div>

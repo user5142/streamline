@@ -69,9 +69,9 @@ const FaqItem = ({ item }: { item: FAQItemProps }) => {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <li>
+    <li className="rounded-2xl border border-base-300 bg-base-100">
       <button
-        className="relative flex gap-2 items-center w-full py-5 text-base font-semibold text-left border-t md:text-lg border-base-content/10"
+        className="relative flex w-full items-center gap-3 px-5 py-4 text-left text-base font-semibold md:text-lg"
         onClick={(e) => {
           e.preventDefault();
           setIsOpen(!isOpen);
@@ -79,46 +79,46 @@ const FaqItem = ({ item }: { item: FAQItemProps }) => {
         aria-expanded={isOpen}
       >
         <span
-          className={`flex-1 text-base-content ${isOpen ? "text-primary" : ""}`}
+          className={`flex-1 ${isOpen ? "text-primary" : "text-base-content"}`}
         >
           {item?.question}
         </span>
-        <svg
-          className={`flex-shrink-0 w-4 h-4 ml-auto fill-current`}
-          viewBox="0 0 16 16"
-          xmlns="http://www.w3.org/2000/svg"
+        <span
+          className={`grid h-7 w-7 shrink-0 place-items-center rounded-full transition-colors duration-200 ${
+            isOpen ? "bg-primary text-primary-content" : "bg-base-200 text-base-content/60"
+          }`}
         >
-          <rect
-            y="7"
-            width="16"
-            height="2"
-            rx="1"
-            className={`transform origin-center transition duration-200 ease-out ${
-              isOpen && "rotate-180"
-            }`}
-          />
-          <rect
-            y="7"
-            width="16"
-            height="2"
-            rx="1"
-            className={`transform origin-center rotate-90 transition duration-200 ease-out ${
-              isOpen && "rotate-180 hidden"
-            }`}
-          />
-        </svg>
+          <svg
+            className="h-3.5 w-3.5 fill-current"
+            viewBox="0 0 16 16"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <rect y="7" width="16" height="2" rx="1" />
+            <rect
+              y="7"
+              width="16"
+              height="2"
+              rx="1"
+              className={`origin-center transition duration-200 ease-out ${
+                isOpen ? "rotate-180 opacity-0" : "rotate-90"
+              }`}
+            />
+          </svg>
+        </span>
       </button>
 
       <div
         ref={accordion}
-        className={`transition-all duration-300 ease-in-out opacity-80 overflow-hidden`}
+        className="overflow-hidden transition-all duration-300 ease-in-out"
         style={
           isOpen
             ? { maxHeight: accordion?.current?.scrollHeight, opacity: 1 }
             : { maxHeight: 0, opacity: 0 }
         }
       >
-        <div className="pb-5 leading-relaxed">{item?.answer}</div>
+        <div className="px-5 pb-5 leading-relaxed text-base-content/70">
+          {item?.answer}
+        </div>
       </div>
     </li>
   );
@@ -127,15 +127,19 @@ const FaqItem = ({ item }: { item: FAQItemProps }) => {
 const FAQ = () => {
   return (
     <section className="bg-base-200" id="faq">
-      <div className="py-24 px-8 max-w-7xl mx-auto flex flex-col md:flex-row gap-12">
-        <div className="flex flex-col text-left basis-1/2">
-          <p className="inline-block font-semibold text-primary mb-4">FAQ</p>
-          <p className="sm:text-4xl text-3xl font-extrabold text-base-content">
-            Frequently Asked Questions
+      <div className="mx-auto grid max-w-7xl gap-10 px-6 py-20 lg:grid-cols-[0.8fr_1.2fr] lg:gap-16 lg:px-8 lg:py-28">
+        <div className="lg:sticky lg:top-28 lg:self-start">
+          <span className="eyebrow">FAQ</span>
+          <h2 className="mt-5 font-display text-3xl font-bold tracking-tight text-base-content sm:text-4xl">
+            Questions, answered
+          </h2>
+          <p className="mt-4 leading-relaxed text-base-content/70">
+            Still curious about something? Reach out and we&apos;ll help you get
+            set up.
           </p>
         </div>
 
-        <ul className="basis-1/2">
+        <ul className="flex flex-col gap-3">
           {faqList.map((item, i) => (
             <FaqItem key={i} item={item} />
           ))}

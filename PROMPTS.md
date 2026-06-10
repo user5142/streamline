@@ -10,6 +10,12 @@ Prompts are recorded in order. Each entry includes the user's input and the mode
 
 ---
 
+**Model:** Claude Opus 4.8
+
+> Please help me improve the UI/UX of both the website/landing page, and the in-app dashboard/screens. Utilize the frontend-design skill and your design expertise. Please create a simple color palette/scheme, working off of the primary #811844 color. Our north star is SaaS brands such as HubSpot, clean, simple, startup/tech vibes. Make the website/landing page feel less boilerplate-like, less generic, and more professional. Feel free to add placeholders to add images to landing page later (such as app dashboard screenshots, etc.). Let me know any questions on this.
+
+---
+
 **Model:** Claude Sonnet 4.6
 
 > Hey, Claude. So we are doing an AI hackathon at our company. I am planning to build a web app that I've been thinking about for a while called Streamline, and it will be a project management tool. Focuses on simplicity and basically a project management tool for non project managers, because I'm a business analyst in IT, so I'm not a project manager. But in the course of my work, I'm managing projects all the time. So that's kind of the twist is this is a tool for people who need to manage projects who aren't formally project managers. I know for sure it's going to include a Gantt chart view, so an overall Gantt chart view of all the projects going on at a given time, which could be filtered by a specific team or a specific person, um, or the company as a whole across all teams. And then I definitely want to have detailed view to be able to drill into specific projects and to see, uh, data about the project, what the start date is, target completion date, actual completion date, um, budget, etcetera. And let's see what else. I'm going to... I know for sure I'm gonna use Supabase for the back end, and I want the ability for users to just do standard authentication, creating an, uh, username and password using their email and setting a password. And for sure, I know we need to start up by having Ability to join an organization when a user is onboarding, so there needs to be, uh, in the user hierarchy. Organizations that individual users are a part of. Um, let's see. That's about it for now. I'm just getting the ball rolling on this. Want to get your thoughts. on the scope before we move forward.
