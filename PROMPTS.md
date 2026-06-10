@@ -269,3 +269,9 @@ Require stack:
 > Please add a Actual Completion field to Projects, this will be used to set the Actual Completion date once projects are actually finished.
 
 ---
+
+---
+
+**Model:** Claude Opus 4.8
+
+> Please do a design sweep/enhancement on the Status colors for projects, the Project detail view, and the gantt chart bar colors, particularly the "blue" that displays on active/not yet completed projects. Make sure the colors on these sections are cohesive with the overall brand colors used in app and landing page. And use frontend-design skill to ensure the optimal UI/UX for these sections.

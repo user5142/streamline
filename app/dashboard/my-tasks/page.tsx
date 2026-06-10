@@ -78,7 +78,7 @@ export default async function MyTasksPage() {
                     </td>
                     <td>
                       <span
-                        className={`badge ${taskStatusBadgeClass(t.status)}`}
+                        className={taskStatusBadgeClass(t.status)}
                       >
                         {taskStatusLabel(t.status)}
                       </span>

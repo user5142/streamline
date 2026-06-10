@@ -15,6 +15,17 @@ type ViewMode = "Day" | "Week" | "Month";
 
 const VIEW_MODES: ViewMode[] = ["Day", "Week", "Month"];
 
+// Legend swatches mirror the saturated bar colors in gantt.css (the color a
+// bar's progress fill takes). "Blocked" is task-only but shares amber's slot
+// in meaning, so the five labels cover both project and task states.
+const STATUS_LEGEND: { value: string; label: string; color: string }[] = [
+  { value: "not_started", label: "Not started", color: "#cdc0c7" },
+  { value: "in_progress", label: "In progress", color: "#811844" },
+  { value: "complete", label: "Complete", color: "#15803d" },
+  { value: "on_hold", label: "On hold", color: "#b45309" },
+  { value: "blocked", label: "Blocked", color: "#be123c" },
+];
+
 const today = (): string => new Date().toISOString().slice(0, 10);
 
 const addDays = (dateStr: string, n: number): string => {
@@ -286,6 +297,22 @@ export default function GanttView() {
             Clear filters
           </button>
         )}
+
+        {/* Bar colors carry status — name them so the timeline is readable. */}
+        <div className="ml-auto flex flex-wrap items-center gap-x-4 gap-y-1.5">
+          {STATUS_LEGEND.map((s) => (
+            <span
+              key={s.value}
+              className="inline-flex items-center gap-1.5 text-xs text-base-content/70"
+            >
+              <span
+                className="h-2.5 w-2.5 rounded-[3px]"
+                style={{ backgroundColor: s.color }}
+              />
+              {s.label}
+            </span>
+          ))}
+        </div>
       </div>
 
       {bars.length === 0 ? (

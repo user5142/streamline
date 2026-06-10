@@ -172,6 +172,60 @@ h1, h2, h3, h4, .font-display {
   background-size: 28px 28px;
 }
 
+/* ── Status pills ─────────────────────────────────────────────────────────────
+   Tonal status chips (tint fill + saturated text + a matching dot) replace the
+   heavy solid DaisyUI badges. Used for project AND task status everywhere, so
+   one status reads identically across the table, the detail view, and tasks.
+   "In progress" is the brand burgundy — active work is what Streamline is for,
+   so the brand color signals it (no off-brand blue). Other states stay on the
+   reserved semantic ramp: complete = green, on hold = amber, blocked = rose. */
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.2rem 0.625rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1.1;
+  letter-spacing: 0.005em;
+  white-space: nowrap;
+  border: 1px solid transparent;
+}
+.status-pill::before {
+  content: "";
+  width: 0.4rem;
+  height: 0.4rem;
+  border-radius: 999px;
+  background: currentColor; /* dot tracks the text color */
+  flex-shrink: 0;
+}
+.status-not_started {
+  color: #6b6168;
+  background: #f3eff1;
+  border-color: #e4dde1;
+}
+.status-in_progress {
+  color: #811844; /* brand */
+  background: #fbeff4; /* brand-tint */
+  border-color: #f1d4e0;
+}
+.status-complete {
+  color: #15803d;
+  background: #e7f4ec;
+  border-color: #cde7d6;
+}
+.status-on_hold {
+  color: #b45309;
+  background: #fbf0e1;
+  border-color: #f1dbbe;
+}
+.status-blocked {
+  color: #be123c;
+  background: #fdeaee;
+  border-color: #f6cfd8;
+}
+
 /* ── Card lift on hover for interactive surfaces ──────────────────────────── */
 .card-lift {
   transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;

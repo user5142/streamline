@@ -411,7 +411,7 @@ export default function TasksSection({
                     }
                   >
                     <span
-                      className={`badge ${taskStatusBadgeClass(task.status)}`}
+                      className={taskStatusBadgeClass(task.status)}
                     >
                       {taskStatusLabel(task.status)}
                     </span>

@@ -4,7 +4,11 @@ import { useState, FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/libs/supabase/client";
 import { getErrorMessage } from "@/libs/getErrorMessage";
-import { PROJECT_STATUSES } from "@/libs/status";
+import {
+  PROJECT_STATUSES,
+  projectStatusLabel,
+  projectStatusBadgeClass,
+} from "@/libs/status";
 import toast from "react-hot-toast";
 import { memberDisplayLabel, type OrgMember } from "@/libs/orgMember";
 import type { Project, Team } from "@/types/database";
@@ -103,21 +107,31 @@ export default function ProjectDetailClient({
 
   return (
     <form onSubmit={handleSave} className="space-y-6">
-      <div className="flex items-start justify-between gap-4">
-        <input
-          required
-          type="text"
-          value={name}
-          className="input input-bordered text-2xl font-extrabold flex-1"
-          onChange={(e) => setName(e.target.value)}
-        />
-        <button
-          type="button"
-          className="btn btn-ghost text-error"
-          onClick={handleDelete}
-        >
-          Delete
-        </button>
+      <div>
+        <div className="flex items-start justify-between gap-4">
+          {/* Inline-editable title: reads as a heading, reveals its field on
+              hover/focus rather than sitting in a permanent input box. */}
+          <input
+            required
+            type="text"
+            value={name}
+            aria-label="Project name"
+            className="font-display text-3xl font-bold flex-1 -mx-2 rounded-lg border border-transparent bg-transparent px-2 py-1 transition-colors hover:border-base-300 focus:border-primary focus:bg-base-100 focus:outline-none"
+            onChange={(e) => setName(e.target.value)}
+          />
+          <button
+            type="button"
+            className="btn btn-ghost btn-sm text-error"
+            onClick={handleDelete}
+          >
+            Delete
+          </button>
+        </div>
+        <div className="mt-2 px-0">
+          <span className={projectStatusBadgeClass(status)}>
+            {projectStatusLabel(status)}
+          </span>
+        </div>
       </div>
 
       <div className="card bg-base-100 border border-base-300">

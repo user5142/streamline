@@ -317,7 +317,7 @@ export default function ProjectsClient({ orgId }: { orgId: string }) {
                   <td className="text-sm">{memberName(p.owner_id)}</td>
                   <td>
                     <span
-                      className={`badge ${projectStatusBadgeClass(p.status)}`}
+                      className={projectStatusBadgeClass(p.status)}
                     >
                       {projectStatusLabel(p.status)}
                     </span>

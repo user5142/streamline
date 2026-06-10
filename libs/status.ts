@@ -22,29 +22,32 @@ export const projectStatusLabel = (s: string): string =>
 export const taskStatusLabel = (s: string): string =>
   TASK_STATUSES.find((x) => x.value === s)?.label ?? s;
 
-// DaisyUI badge modifier classes for a status value.
+// Tonal status-pill classes (defined in app/globals.css) for a status value.
+// Returns the full class string, including the base `.status-pill` — callers
+// apply it directly, no `badge` prefix. "In progress" reads as the brand
+// burgundy; other states sit on the reserved semantic ramp.
 export const projectStatusBadgeClass = (s: string): string => {
   switch (s) {
     case "in_progress":
-      return "badge-info";
+      return "status-pill status-in_progress";
     case "complete":
-      return "badge-success";
+      return "status-pill status-complete";
     case "on_hold":
-      return "badge-warning";
+      return "status-pill status-on_hold";
     default:
-      return "badge-ghost";
+      return "status-pill status-not_started";
   }
 };
 
 export const taskStatusBadgeClass = (s: string): string => {
   switch (s) {
     case "in_progress":
-      return "badge-info";
+      return "status-pill status-in_progress";
     case "complete":
-      return "badge-success";
+      return "status-pill status-complete";
     case "blocked":
-      return "badge-error";
+      return "status-pill status-blocked";
     default:
-      return "badge-ghost";
+      return "status-pill status-not_started";
   }
 };

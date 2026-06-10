@@ -1,30 +1,62 @@
 /* Status-based bar colors + project/task differentiation for the Gantt.
    frappe-gantt applies a task's `custom_class` to its bar wrapper group via
    classList.add(), which rejects space-separated tokens — so each bar carries a
-   SINGLE token: "gp-<status>" for projects, "gt-<status>" for tasks. */
+   SINGLE token: "gp-<status>" for projects, "gt-<status>" for tasks.
 
+   Two layers make up a bar: `.bar` is the full-width track, `.bar-progress` is
+   the completed portion overlaid from the left. We color them as a pair — a
+   light tint for the track, the saturated status color for the progress fill —
+   so the *done* portion reads as the strong color (it previously fell back to a
+   gray that made completed work look faded). Colors match the status pills and
+   the burgundy timeline on the landing page: active work is the brand burgundy,
+   never an off-brand blue. */
+
+/* Not started — no progress to show, so the track itself carries a muted,
+   plum-tinted neutral that still reads against the grid. */
 .gantt .gp-not_started .bar,
 .gantt .gt-not_started .bar {
-  fill: #9ca3af;
+  fill: #cdc0c7;
 }
+
+/* In progress — brand burgundy fill on a brand-tint track. */
 .gantt .gp-in_progress .bar,
 .gantt .gt-in_progress .bar {
-  fill: #3b82f6;
+  fill: #f3d6e1;
 }
+.gantt .gp-in_progress .bar-progress,
+.gantt .gt-in_progress .bar-progress {
+  fill: #811844;
+}
+
+/* Complete — green fill (bars are 100%, so the fill covers the whole track). */
 .gantt .gp-complete .bar,
 .gantt .gt-complete .bar {
-  fill: #22c55e;
+  fill: #c6e6d2;
 }
-.gantt .gp-on_hold .bar,
+.gantt .gp-complete .bar-progress,
+.gantt .gt-complete .bar-progress {
+  fill: #15803d;
+}
+
+/* On hold (projects) / blocked (tasks) — amber and rose, matching the pills. */
+.gantt .gp-on_hold .bar {
+  fill: #f6e1c2;
+}
+.gantt .gp-on_hold .bar-progress {
+  fill: #b45309;
+}
 .gantt .gt-blocked .bar {
-  fill: #f59e0b;
+  fill: #f8d5dd;
+}
+.gantt .gt-blocked .bar-progress {
+  fill: #be123c;
 }
 
 /* Task (sub) bars render lighter so the project/task hierarchy is legible when
    a project is expanded. */
 .gantt [class^="gt-"] .bar,
 .gantt [class*=" gt-"] .bar {
-  opacity: 0.75;
+  opacity: 0.78;
 }
 .gantt [class^="gt-"] .bar-label,
 .gantt [class*=" gt-"] .bar-label {
