@@ -28,17 +28,18 @@
   fill: #811844;
 }
 
-/* Complete — fresh emerald fill (bars are 100%, so the fill covers the whole
-   track). Sits at the same tonal weight as the burgundy / amber / rose fills so
-   the five states read as one cohesive ramp; the old #15803d was noticeably
-   darker and broke that rhythm. */
+/* Complete — emerald fill. Tuned to #059669, which carries the same perceptual
+   weight as the burgundy / amber / rose fills (green reads lighter at equal
+   lightness, so a slightly deeper emerald is needed to sit on the same tonal
+   ramp). #15803d was too dark, #16a34a too vivid/"highlighter"; #059669 is the
+   professional middle ground that reads as one family with the warm states. */
 .gantt .gp-complete .bar,
 .gantt .gt-complete .bar {
-  fill: #d6f0e0;
+  fill: #d4efe3;
 }
 .gantt .gp-complete .bar-progress,
 .gantt .gt-complete .bar-progress {
-  fill: #16a34a;
+  fill: #059669;
 }
 
 /* On hold (projects) / blocked (tasks) — amber and rose, matching the pills. */
@@ -86,4 +87,92 @@
   stroke: rgba(36, 16, 25, 0.55); /* brand ink, softened */
   stroke-width: 2px;
   stroke-linejoin: round;
+}
+
+/* ───────────────────────────────────────────────────────────────────────────
+   Professional polish — retune frappe-gantt's stock greys to the Streamline
+   brand system so the chrome (grid, header, today marker, scrollbar) feels of a
+   piece with the rest of the app rather than a bolted-on library. The vendor
+   stylesheet drives everything off CSS custom properties on :root; we override
+   those properties scoped to .gantt-container so the cascade re-skins the whole
+   chart without touching vendor rules. */
+.gantt-container {
+  --g-header-background: #ffffff;
+  --g-row-color: #ffffff;
+  --g-row-border-color: #efe6eb; /* base-300 */
+  --g-border-color: #f3eef1;
+  --g-tick-color: #f7f3f5;
+  --g-tick-color-thick: #efe6eb;
+  --g-text-dark: #2a1f25; /* base-content */
+  --g-text-muted: #8a7f84; /* brand muted */
+  --g-today-highlight: #811844; /* today marker rides the brand burgundy */
+  --g-weekend-highlight-color: #faf6f8; /* base-200 */
+  --g-actions-background: #faf6f8;
+  font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+}
+
+/* Header type: lead the upper band (months/weeks) with the display face and a
+   touch of tracking, mirroring the app's headings. */
+.gantt-container .upper-text {
+  font-family: var(--font-display), var(--font-sans), sans-serif;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+.gantt-container .lower-text {
+  letter-spacing: 0.01em;
+}
+
+/* Today marker: a soft burgundy pill on the date + a hairline down the grid,
+   instead of the stock charcoal. */
+.gantt-container .current-date-highlight {
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+.gantt-container .current-highlight {
+  opacity: 0.55;
+}
+
+/* Bars: drop the boxy 1px grey outline the vendor draws around every bar in
+   favour of a barely-there ink hairline, and let labels ride the app's Inter
+   face. Rounded corners come from the bar_corner_radius option in GanttView. */
+.gantt .bar-wrapper .bar {
+  outline: none;
+  stroke: rgba(36, 16, 25, 0.06);
+  stroke-width: 1;
+}
+.gantt .bar-label {
+  font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+  font-size: 12.5px;
+}
+
+/* Lift the bar a hair on hover so the row reads as interactive (the whole chart
+   is click-to-expand / click-to-open). */
+.gantt .bar-wrapper {
+  transition: filter 0.15s ease;
+}
+.gantt .bar-wrapper:hover {
+  filter: brightness(0.96);
+}
+
+/* Thin, brand-tinted scrollbar for horizontal timeline navigation — the wheel
+   is reserved for vertical page scroll (see GanttView's wheel handler), so the
+   scrollbar is the primary affordance for panning across dates. */
+.gantt-container::-webkit-scrollbar {
+  height: 10px;
+  width: 10px;
+}
+.gantt-container::-webkit-scrollbar-track {
+  background: transparent;
+}
+.gantt-container::-webkit-scrollbar-thumb {
+  background: #e0d2da;
+  border: 3px solid #ffffff;
+  border-radius: 999px;
+}
+.gantt-container::-webkit-scrollbar-thumb:hover {
+  background: #cbb6c1;
+}
+.gantt-container {
+  scrollbar-width: thin;
+  scrollbar-color: #e0d2da transparent;
 }

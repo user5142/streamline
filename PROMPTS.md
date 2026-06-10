@@ -325,3 +325,9 @@ Require stack:
 **Model:** Claude Opus 4.8
 
 > Please update the green color for Complete status on the Gantt view, the current green doesn't fit very well with the other status colors, it's too dark and not cohesive. Please also update the Gantt view such that the project names within the bars are more easily visible, right now, especially on statuses like Completed and In progress, the text is too hard to see with the dark colors behind it.
+
+---
+
+**Model:** Claude Opus 4.8
+
+> Please help me improve the design of the Gantt view - ensure the complete bar status color is cohesive with the other colors, make sure the gantt view overall looks very professional, as if designed by a Pro UX/UI Designer. Also, there is some buggy behavoir with the scrolling within the Gantt view when the user uses their mouse scrollwheel, make sure there is a good UX for this, user should be able to scroll vertically up and down with the mouse scrollwheel smoothly, and the view should not scroll horizontally at all from the scrollwheel.
