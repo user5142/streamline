@@ -309,3 +309,13 @@ Require stack:
 **Model:** Claude Opus 4.8
 
 > Please add Start Date to the Projects page. Also, on the Project detail view, display Start date as Start Date, Target completion as Target Completion and Actual completion as Actual Completion
+
+---
+
+**Model:** Claude Sonnet 4.6
+
+> On Project detail view:
+> 
+> "Set when the project is finished" looks off, because the "Set" is being displayed right snug next to the Actual Completion field, please make it such that this text wraps to the line below/comes below the field, not on the same line.
+> 
+> Additionally, the Description text and the field are next to each other horizontally, please update so that Description text is above/on top of the free text entry.

@@ -209,26 +209,26 @@ export default function ProjectDetailClient({
               onChange={(e) => setTargetDate(e.target.value)}
             />
           </label>
-          <label className="form-control">
+          <label className="form-control w-full">
             <span className="label-text mb-1">Actual Completion</span>
             <input
               type="date"
               value={actualDate}
-              className="input input-bordered"
+              className="input input-bordered w-full"
               onChange={(e) => setActualDate(e.target.value)}
             />
-            <span className="label-text-alt mt-1 text-base-content/50">
+            <p className="mt-1 text-sm text-base-content/50">
               Set when the project is finished.
-            </span>
+            </p>
           </label>
         </div>
       </div>
 
-      <label className="form-control">
+      <label className="form-control flex w-full flex-col">
         <span className="label-text mb-1">Description</span>
         <textarea
           value={description}
-          className="textarea textarea-bordered"
+          className="textarea textarea-bordered w-full"
           rows={4}
           onChange={(e) => setDescription(e.target.value)}
         />
