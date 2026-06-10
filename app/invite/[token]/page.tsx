@@ -76,7 +76,7 @@ export default async function InvitePage({
           Sign in or create an account to accept this invitation.
         </p>
         <Link
-          href={`${config.auth.loginUrl}?next=/invite/${token}`}
+          href={`${config.auth.loginUrl}?mode=signup&next=/invite/${token}`}
           className="btn btn-primary"
         >
           Continue

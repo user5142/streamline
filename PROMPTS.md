@@ -275,3 +275,9 @@ Require stack:
 **Model:** Claude Opus 4.8
 
 > Please do a design sweep/enhancement on the Status colors for projects, the Project detail view, and the gantt chart bar colors, particularly the "blue" that displays on active/not yet completed projects. Make sure the colors on these sections are cohesive with the overall brand colors used in app and landing page. And use frontend-design skill to ensure the optimal UI/UX for these sections.
+
+---
+
+**Model:** Claude Opus 4.8
+
+> When I generate invite link, then copy link and paste in an incognito window to test as new user, then click Continue button, the next page it takes me to is "Welcome back" sign in page, but I should be taken instead directly to the Create your account sign up page.
