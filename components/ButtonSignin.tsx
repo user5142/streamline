@@ -13,9 +13,11 @@ import config from "@/config";
 const ButtonSignin = ({
   text = "Get started",
   extraStyle,
+  href = config.auth.loginUrl,
 }: {
   text?: string;
   extraStyle?: string;
+  href?: string;
 }) => {
   const supabase = createClient();
   const [user, setUser] = useState<User>(null);
@@ -58,10 +60,7 @@ const ButtonSignin = ({
   }
 
   return (
-    <Link
-      className={`btn ${extraStyle ? extraStyle : ""}`}
-      href={config.auth.loginUrl}
-    >
+    <Link className={`btn ${extraStyle ? extraStyle : ""}`} href={href}>
       {text}
     </Link>
   );

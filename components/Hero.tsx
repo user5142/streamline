@@ -28,7 +28,10 @@ const Hero = () => {
           </p>
 
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-            <Link href={config.auth.loginUrl} className="btn btn-primary btn-lg">
+            <Link
+              href={`${config.auth.loginUrl}?mode=signup`}
+              className="btn btn-primary btn-lg"
+            >
               Get started free
               <svg
                 viewBox="0 0 20 20"

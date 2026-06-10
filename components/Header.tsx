@@ -26,7 +26,9 @@ const links: {
   },
 ];
 
-const cta: JSX.Element = <ButtonSignin extraStyle="btn-primary" />;
+const cta: JSX.Element = (
+  <ButtonSignin extraStyle="btn-primary" href={`${config.auth.loginUrl}?mode=signup`} />
+);
 
 // A header with a logo on the left, links in the center (like Pricing, etc...), and a CTA (like Get Started or Login) on the right.
 // The header is responsive, and on mobile, the links are hidden behind a burger button.
@@ -182,7 +184,10 @@ const Header = () => {
               >
                 Sign in
               </Link>
-              <ButtonSignin extraStyle="btn-primary btn-block" />
+              <ButtonSignin
+                extraStyle="btn-primary btn-block"
+                href={`${config.auth.loginUrl}?mode=signup`}
+              />
             </div>
           </div>
         </div>

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { useState, FormEvent } from "react";
+import { useState, useEffect, FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/libs/supabase/client";
 // import { Provider } from "@supabase/supabase-js"; // (re-enable with OAuth below)
@@ -25,6 +25,14 @@ export default function Login() {
 
   const [mode, setMode] = useState<"signin" | "signup">("signin");
   const [email, setEmail] = useState<string>("");
+
+  // Open in sign-up mode when linked to with ?mode=signup (e.g. the
+  // "Get started" CTAs on the marketing pages).
+  useEffect(() => {
+    const param = new URLSearchParams(window.location.search).get("mode");
+    if (param === "signup") setMode("signup");
+  }, []);
+
   const [password, setPassword] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
