@@ -17,13 +17,13 @@ const Hero = () => {
           <span className="eyebrow">Project management, minus the overhead</span>
 
           <h1 className="font-display text-4xl font-bold leading-[1.05] tracking-tight text-base-content sm:text-5xl lg:text-6xl">
-            Run your projects without the{" "}
-            <span className="text-primary">project-manager</span> job title
+          Project management for people with{" "}
+            <span className="text-primary">other jobs</span> to do
           </h1>
 
           <p className="max-w-xl text-lg leading-relaxed text-base-content/70">
             Streamline puts your projects, tasks, and a company-wide Gantt in one
-            clean view — without the weight of Jira or Asana. Built for people who
+            clean view, without the weight of Jira or Asana. Built for people who
             run projects as part of their role, not their title.
           </p>
 

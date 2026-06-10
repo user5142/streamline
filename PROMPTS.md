@@ -6,6 +6,12 @@ Prompts are recorded in order. Each entry includes the user's input and the mode
 
 **Model:** Claude Opus 4.8
 
+> "Run your projects without the project-manager job title" - I feel like we can come up with a more compelling H1 for this hero. Can you help me come up with some alternatives?
+
+---
+
+**Model:** Claude Opus 4.8
+
 > Please help me add the anthropic frontend-design skill to the project: https://github.com/anthropics/skills/tree/main/skills/frontend-design
 
 ---
