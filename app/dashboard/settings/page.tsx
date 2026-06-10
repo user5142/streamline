@@ -5,7 +5,7 @@ import Link from "next/link";
 import { createClient } from "@/libs/supabase/client";
 import { getErrorMessage } from "@/libs/getErrorMessage";
 import toast from "react-hot-toast";
-import type { Invite } from "@/types/database";
+import type { Invite, Team } from "@/types/database";
 
 // Admin settings — invite management (INV-01, INV-04). Generate a link, copy
 // it to share manually, and revoke outstanding invites.
@@ -13,7 +13,9 @@ export default function SettingsPage() {
   const supabase = createClient();
 
   const [invites, setInvites] = useState<Invite[]>([]);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [teams, setTeams] = useState<Team[]>([]);
+  const [isLoadingInvites, setIsLoadingInvites] = useState<boolean>(true);
+  const [isLoadingTeams, setIsLoadingTeams] = useState<boolean>(true);
   const [isGenerating, setIsGenerating] = useState<boolean>(false);
 
   const loadInvites = useCallback(async () => {
@@ -28,12 +30,28 @@ export default function SettingsPage() {
     } else {
       setInvites((data as Invite[]) ?? []);
     }
-    setIsLoading(false);
+    setIsLoadingInvites(false);
+  }, [supabase]);
+
+  const loadTeams = useCallback(async () => {
+    const { data, error } = await supabase
+      .from("teams")
+      .select("*")
+      .order("name");
+
+    if (error) {
+      console.error("load teams failed:", getErrorMessage(error), error);
+      toast.error("Could not load teams.");
+    } else {
+      setTeams((data as Team[]) ?? []);
+    }
+    setIsLoadingTeams(false);
   }, [supabase]);
 
   useEffect(() => {
     loadInvites();
-  }, [loadInvites]);
+    loadTeams();
+  }, [loadInvites, loadTeams]);
 
   const inviteUrl = (token: string): string =>
     typeof window !== "undefined"
@@ -91,13 +109,50 @@ export default function SettingsPage() {
   return (
     <main className="min-h-screen p-8 pb-24">
       <section className="max-w-3xl mx-auto space-y-8">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl md:text-4xl font-extrabold">Settings</h1>
+        <div>
+          <h1 className="text-3xl md:text-4xl font-extrabold">Settings</h1>
+        </div>
+
+        <div className="card bg-base-100 border border-base-300">
+          <div className="card-body">
+            <div className="flex items-center justify-between gap-4">
+              <div>
+                <h2 className="card-title">Teams</h2>
+                <p className="text-sm text-base-content/70">
+                  Organize people into teams. Projects are assigned to a team.
+                </p>
+              </div>
+              <Link
+                href="/dashboard/settings/teams"
+                className="btn btn-primary shrink-0"
+              >
+                Manage teams
+              </Link>
+            </div>
+
+            <div className="divider my-2"></div>
+
+            {isLoadingTeams ? (
+              <div className="flex justify-center py-6">
+                <span className="loading loading-spinner"></span>
+              </div>
+            ) : teams.length === 0 ? (
+              <p className="text-sm text-base-content/60 py-4">
+                No teams yet. Create one on the teams page.
+              </p>
+            ) : (
+              <ul className="divide-y divide-base-300">
+                {teams.map((team) => (
+                  <li
+                    key={team.id}
+                    className="py-2 text-sm font-medium first:pt-0 last:pb-0"
+                  >
+                    {team.name}
+                  </li>
+                ))}
+              </ul>
+            )}
           </div>
-          <Link href="/dashboard/settings/teams" className="btn btn-sm">
-            Manage teams
-          </Link>
         </div>
 
         <div className="card bg-base-100 border border-base-300">
@@ -124,7 +179,7 @@ export default function SettingsPage() {
 
             <div className="divider my-2"></div>
 
-            {isLoading ? (
+            {isLoadingInvites ? (
               <div className="flex justify-center py-6">
                 <span className="loading loading-spinner"></span>
               </div>

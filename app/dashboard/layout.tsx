@@ -74,7 +74,7 @@ export default async function LayoutPrivate({
           aria-label="Close navigation"
           className="drawer-overlay"
         ></label>
-        <DashboardSidebar isAdmin={isAdmin} />
+        <DashboardSidebar isAdmin={isAdmin} fullName={profile.full_name} />
       </div>
     </div>
   );

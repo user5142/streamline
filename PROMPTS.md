@@ -219,3 +219,15 @@ Prompts are recorded in order. Each entry includes the user's input and the mode
 > There is not enough padding on the "Welcome to Streamline" onboarding page between the Name and Org fields, and between those fields and the button. Can you please update this, and update on any other onboarding pages that also need this update?
 
 ---
+
+**Model:** Cursor Auto
+
+> Can you make it so that the Manage teams page displays as a preview within Settings, instead of just a button that takes you to the page? The preview should just show something simple, like a list of all Teams, then there is a button to click into the Teams page to manage the details.
+
+---
+
+**Model:** Cursor Auto
+
+> Please update the Profile name display at bottom of sidebar in app. This should display user name, not user email. And also, make sure the pop up menu that opens when user clicks on their profile is fully displayed over all elements, currently it seems the right edge of the pop up menu is getting hidden behind the main dashboard ui screen.
+
+---

@@ -118,7 +118,13 @@ const closeDrawer = () => {
   if (toggle) toggle.checked = false;
 };
 
-const DashboardSidebar = ({ isAdmin }: { isAdmin: boolean }) => {
+const DashboardSidebar = ({
+  isAdmin,
+  fullName,
+}: {
+  isAdmin: boolean;
+  fullName: string | null;
+}) => {
   const pathname = usePathname();
 
   const items = NAV_ITEMS.filter((item) => !item.adminOnly || isAdmin);
@@ -169,8 +175,8 @@ const DashboardSidebar = ({ isAdmin }: { isAdmin: boolean }) => {
         </ul>
       </nav>
 
-      <div className="p-3 border-t border-base-300">
-        <ButtonAccount />
+      <div className="overflow-visible p-3 border-t border-base-300">
+        <ButtonAccount displayName={fullName} />
       </div>
     </aside>
   );
