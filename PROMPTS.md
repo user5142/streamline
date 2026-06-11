@@ -343,3 +343,9 @@ Require stack:
 **Model:** GPT-5.5
 
 > It's still not quite there - it feels almost like my scroll is "hijacked" when scrolling within scrollwheel inside the gantt chart up or down, like the scroll is slower than normal.
+
+---
+
+**Model:** Claude Sonnet 4.6
+
+> Please update Gantt page so that it defaults to Month view instead of Week

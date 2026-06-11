@@ -60,7 +60,7 @@ export default function GanttView() {
 
   const [teamFilter, setTeamFilter] = useState<string>("");
   const [personFilter, setPersonFilter] = useState<string>("");
-  const [viewMode, setViewMode] = useState<ViewMode>("Week");
+  const [viewMode, setViewMode] = useState<ViewMode>("Month");
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
 
   const loadAll = useCallback(async () => {
