@@ -11,36 +11,12 @@ import {
 } from "@/libs/status";
 import toast from "react-hot-toast";
 import { memberDisplayLabel, type OrgMember } from "@/libs/orgMember";
+import {
+  sortProjects,
+  type ProjectSortColumn,
+  type SortDirection,
+} from "@/libs/projectSort";
 import type { Project, Team } from "@/types/database";
-
-type SortColumn =
-  | "name"
-  | "team"
-  | "owner"
-  | "status"
-  | "start_date"
-  | "target"
-  | "actual";
-type SortDirection = "asc" | "desc";
-
-const STATUS_SORT_ORDER = new Map(
-  PROJECT_STATUSES.map((s, i) => [s.value, i])
-);
-
-function compareStrings(a: string, b: string, dir: number): number {
-  return a.localeCompare(b, undefined, { sensitivity: "base" }) * dir;
-}
-
-function compareDates(
-  a: string | null,
-  b: string | null,
-  dir: number
-): number {
-  if (!a && !b) return 0;
-  if (!a) return 1;
-  if (!b) return -1;
-  return (new Date(a).getTime() - new Date(b).getTime()) * dir;
-}
 
 export default function ProjectsClient({ orgId }: { orgId: string }) {
   const supabase = createClient();
@@ -65,7 +41,7 @@ export default function ProjectsClient({ orgId }: { orgId: string }) {
   const [teamFilter, setTeamFilter] = useState<string>("");
   const [ownerFilter, setOwnerFilter] = useState<string>("");
   const [statusFilter, setStatusFilter] = useState<string>("");
-  const [sortColumn, setSortColumn] = useState<SortColumn>("name");
+  const [sortColumn, setSortColumn] = useState<ProjectSortColumn>("name");
   const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
 
   const loadAll = useCallback(async () => {
@@ -114,8 +90,6 @@ export default function ProjectsClient({ orgId }: { orgId: string }) {
   const hasActiveFilters = Boolean(teamFilter || ownerFilter || statusFilter);
 
   const visibleProjects = useMemo(() => {
-    const dir = sortDirection === "asc" ? 1 : -1;
-
     const filtered = projects.filter((p) => {
       if (teamFilter && p.team_id !== teamFilter) return false;
       if (ownerFilter && p.owner_id !== ownerFilter) return false;
@@ -123,41 +97,13 @@ export default function ProjectsClient({ orgId }: { orgId: string }) {
       return true;
     });
 
-    return [...filtered].sort((a, b) => {
-      switch (sortColumn) {
-        case "name":
-          return compareStrings(a.name, b.name, dir);
-        case "team":
-          return compareStrings(teamName(a.team_id), teamName(b.team_id), dir);
-        case "owner":
-          return compareStrings(
-            memberName(a.owner_id),
-            memberName(b.owner_id),
-            dir
-          );
-        case "status": {
-          const aOrder = STATUS_SORT_ORDER.get(a.status) ?? 999;
-          const bOrder = STATUS_SORT_ORDER.get(b.status) ?? 999;
-          return (aOrder - bOrder) * dir;
-        }
-        case "start_date":
-          return compareDates(a.start_date, b.start_date, dir);
-        case "target":
-          return compareDates(
-            a.target_completion_date,
-            b.target_completion_date,
-            dir
-          );
-        case "actual":
-          return compareDates(
-            a.actual_completion_date,
-            b.actual_completion_date,
-            dir
-          );
-        default:
-          return 0;
-      }
-    });
+    return sortProjects(
+      filtered,
+      sortColumn,
+      sortDirection,
+      teams,
+      members
+    );
   }, [
     projects,
     teamFilter,
@@ -169,7 +115,7 @@ export default function ProjectsClient({ orgId }: { orgId: string }) {
     members,
   ]);
 
-  const handleSort = (column: SortColumn) => {
+  const handleSort = (column: ProjectSortColumn) => {
     if (sortColumn === column) {
       setSortDirection((d) => (d === "asc" ? "desc" : "asc"));
     } else {
@@ -188,7 +134,7 @@ export default function ProjectsClient({ orgId }: { orgId: string }) {
     column,
     label,
   }: {
-    column: SortColumn;
+    column: ProjectSortColumn;
     label: string;
   }) => (
     <th>

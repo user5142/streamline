@@ -8,6 +8,12 @@ import "./gantt.css";
 import { createClient } from "@/libs/supabase/client";
 import { getErrorMessage } from "@/libs/getErrorMessage";
 import { memberDisplayLabel, type OrgMember } from "@/libs/orgMember";
+import {
+  PROJECT_SORT_COLUMNS,
+  sortProjects,
+  type ProjectSortColumn,
+  type SortDirection,
+} from "@/libs/projectSort";
 import toast from "react-hot-toast";
 import type { Project, Task, Team } from "@/types/database";
 type Assignee = { task_id: string; profile_id: string };
@@ -60,6 +66,8 @@ export default function GanttView() {
 
   const [teamFilter, setTeamFilter] = useState<string>("");
   const [personFilter, setPersonFilter] = useState<string>("");
+  const [sortColumn, setSortColumn] = useState<ProjectSortColumn>("name");
+  const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
   const [viewMode, setViewMode] = useState<ViewMode>("Month");
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
 
@@ -126,11 +134,19 @@ export default function GanttView() {
 
   // Build the flat bar list for Frappe Gantt from the current filters/expansion.
   const bars = useMemo<FrappeTask[]>(() => {
-    const visibleProjects = projects.filter((p) => {
+    const filtered = projects.filter((p) => {
       if (teamFilter && p.team_id !== teamFilter) return false;
       if (personProjectIds && !personProjectIds.has(p.id)) return false;
       return true;
     });
+
+    const visibleProjects = sortProjects(
+      filtered,
+      sortColumn,
+      sortDirection,
+      teams,
+      members
+    );
 
     const result: FrappeTask[] = [];
 
@@ -195,6 +211,10 @@ export default function GanttView() {
     teamFilter,
     personFilter,
     personProjectIds,
+    sortColumn,
+    sortDirection,
+    teams,
+    members,
     expanded,
   ]);
 
@@ -302,6 +322,40 @@ export default function GanttView() {
               </option>
             ))}
           </select>
+        </label>
+
+        <label className="form-control">
+          <span className="label-text mb-1">Sort by</span>
+          <div className="flex gap-1">
+            <select
+              value={sortColumn}
+              className="select select-bordered select-sm"
+              onChange={(e) => {
+                setSortColumn(e.target.value as ProjectSortColumn);
+                setSortDirection("asc");
+              }}
+            >
+              {PROJECT_SORT_COLUMNS.map((col) => (
+                <option key={col.value} value={col.value}>
+                  {col.label}
+                </option>
+              ))}
+            </select>
+            <button
+              type="button"
+              className="btn btn-sm btn-square btn-bordered"
+              aria-label={
+                sortDirection === "asc"
+                  ? "Sorted ascending"
+                  : "Sorted descending"
+              }
+              onClick={() =>
+                setSortDirection((d) => (d === "asc" ? "desc" : "asc"))
+              }
+            >
+              {sortDirection === "asc" ? "↑" : "↓"}
+            </button>
+          </div>
         </label>
 
         <div className="join">
