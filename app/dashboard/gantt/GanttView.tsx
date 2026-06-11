@@ -66,7 +66,7 @@ export default function GanttView() {
 
   const [teamFilter, setTeamFilter] = useState<string>("");
   const [personFilter, setPersonFilter] = useState<string>("");
-  const [sortColumn, setSortColumn] = useState<ProjectSortColumn>("name");
+  const [sortColumn, setSortColumn] = useState<ProjectSortColumn>("start_date");
   const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
   const [viewMode, setViewMode] = useState<ViewMode>("Month");
   const [expanded, setExpanded] = useState<Set<string>>(new Set());

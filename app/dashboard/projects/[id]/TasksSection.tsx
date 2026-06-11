@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback, FormEvent } from "react";
+import { useState, useEffect, useCallback, useMemo, FormEvent } from "react";
 import { createClient } from "@/libs/supabase/client";
 import { getErrorMessage } from "@/libs/getErrorMessage";
 import {
@@ -9,6 +9,12 @@ import {
   taskStatusBadgeClass,
 } from "@/libs/status";
 import { memberDisplayLabel, type OrgMember } from "@/libs/orgMember";
+import {
+  PROJECT_TASK_SORT_COLUMNS,
+  sortProjectTasks,
+  type SortDirection,
+  type TaskSortColumn,
+} from "@/libs/taskSort";
 import toast from "react-hot-toast";
 import type { Task, ActionItem } from "@/types/database";
 
@@ -48,6 +54,11 @@ export default function TasksSection({
 
   // New action-item draft text, keyed by task id.
   const [actionDrafts, setActionDrafts] = useState<Record<string, string>>({});
+
+  const [statusFilter, setStatusFilter] = useState<string>("");
+  const [assigneeFilter, setAssigneeFilter] = useState<string>("");
+  const [sortColumn, setSortColumn] = useState<TaskSortColumn>("due_date");
+  const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
 
   const loadAll = useCallback(async () => {
     const { data: taskData, error } = await supabase
@@ -94,6 +105,39 @@ export default function TasksSection({
 
   const taskAssignees = (taskId: string): string[] =>
     assignees.filter((a) => a.task_id === taskId).map((a) => a.profile_id);
+
+  const hasActiveFilters = Boolean(statusFilter || assigneeFilter);
+
+  const visibleTasks = useMemo(() => {
+    const filtered = tasks.filter((t) => {
+      if (statusFilter && t.status !== statusFilter) return false;
+      if (assigneeFilter && !taskAssignees(t.id).includes(assigneeFilter)) {
+        return false;
+      }
+      return true;
+    });
+
+    return sortProjectTasks(
+      filtered,
+      sortColumn,
+      sortDirection,
+      members,
+      taskAssignees
+    );
+  }, [
+    tasks,
+    assignees,
+    members,
+    statusFilter,
+    assigneeFilter,
+    sortColumn,
+    sortDirection,
+  ]);
+
+  const clearFilters = () => {
+    setStatusFilter("");
+    setAssigneeFilter("");
+  };
 
   // Distinct people across all tasks — the project's assigned members (PRJ-02).
   const projectPeople = Array.from(new Set(assignees.map((a) => a.profile_id)));
@@ -393,8 +437,112 @@ export default function TasksSection({
             No tasks yet. Add one to break this project down.
           </p>
         ) : (
-          <div className="space-y-2">
-            {tasks.map((task) => {
+          <div className="space-y-4">
+            <div className="flex flex-wrap items-end gap-4">
+              <p className="text-sm text-base-content/60 mr-auto">
+                {hasActiveFilters
+                  ? `${visibleTasks.length} of ${tasks.length} tasks`
+                  : `${tasks.length} ${tasks.length === 1 ? "task" : "tasks"}`}
+              </p>
+
+              <label className="form-control">
+                <span className="label-text mb-1">Status</span>
+                <select
+                  value={statusFilter}
+                  className="select select-bordered select-sm"
+                  onChange={(e) => setStatusFilter(e.target.value)}
+                >
+                  <option value="">All statuses</option>
+                  {TASK_STATUSES.map((s) => (
+                    <option key={s.value} value={s.value}>
+                      {s.label}
+                    </option>
+                  ))}
+                </select>
+              </label>
+
+              {members.length > 0 && (
+                <label className="form-control">
+                  <span className="label-text mb-1">Assignee</span>
+                  <select
+                    value={assigneeFilter}
+                    className="select select-bordered select-sm"
+                    onChange={(e) => setAssigneeFilter(e.target.value)}
+                  >
+                    <option value="">All assignees</option>
+                    {members.map((m) => (
+                      <option key={m.id} value={m.id}>
+                        {memberDisplayLabel(m)}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              )}
+
+              <label className="form-control">
+                <span className="label-text mb-1">Sort by</span>
+                <div className="flex gap-1">
+                  <select
+                    value={sortColumn}
+                    className="select select-bordered select-sm"
+                    onChange={(e) => {
+                      setSortColumn(e.target.value as TaskSortColumn);
+                      setSortDirection("asc");
+                    }}
+                  >
+                    {PROJECT_TASK_SORT_COLUMNS.map((col) => (
+                      <option key={col.value} value={col.value}>
+                        {col.label}
+                      </option>
+                    ))}
+                  </select>
+                  <button
+                    type="button"
+                    className="btn btn-sm btn-square btn-bordered"
+                    aria-label={
+                      sortDirection === "asc"
+                        ? "Sorted ascending"
+                        : "Sorted descending"
+                    }
+                    onClick={() =>
+                      setSortDirection((d) => (d === "asc" ? "desc" : "asc"))
+                    }
+                  >
+                    {sortDirection === "asc" ? "↑" : "↓"}
+                  </button>
+                </div>
+              </label>
+
+              {hasActiveFilters && (
+                <button
+                  type="button"
+                  className="btn btn-ghost btn-sm"
+                  onClick={clearFilters}
+                >
+                  Clear filters
+                </button>
+              )}
+            </div>
+
+            {visibleTasks.length === 0 ? (
+              <div className="rounded-lg border border-dashed border-base-300 px-4 py-8 text-center">
+                <p className="text-sm font-medium text-base-content">
+                  No tasks match your filters
+                </p>
+                <p className="mt-1 text-sm text-base-content/60">
+                  Try changing the status or assignee filters.
+                </p>
+                <button
+                  type="button"
+                  className="btn btn-ghost btn-sm mt-3"
+                  onClick={clearFilters}
+                >
+                  Clear filters
+                </button>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                {visibleTasks.map((task) => {
               const expanded = expandedId === task.id;
               const items = actionItems.filter((i) => i.task_id === task.id);
               const doneCount = items.filter((i) => i.is_complete).length;
@@ -598,7 +746,9 @@ export default function TasksSection({
                   )}
                 </div>
               );
-            })}
+                })}
+              </div>
+            )}
           </div>
         )}
       </div>

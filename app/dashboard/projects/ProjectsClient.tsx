@@ -41,7 +41,7 @@ export default function ProjectsClient({ orgId }: { orgId: string }) {
   const [teamFilter, setTeamFilter] = useState<string>("");
   const [ownerFilter, setOwnerFilter] = useState<string>("");
   const [statusFilter, setStatusFilter] = useState<string>("");
-  const [sortColumn, setSortColumn] = useState<ProjectSortColumn>("name");
+  const [sortColumn, setSortColumn] = useState<ProjectSortColumn>("start_date");
   const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
 
   const loadAll = useCallback(async () => {
