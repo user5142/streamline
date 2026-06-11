@@ -51,6 +51,13 @@ function compareDates(
   return (new Date(a).getTime() - new Date(b).getTime()) * dir;
 }
 
+export interface MyTaskActionItem {
+  id: string;
+  title: string;
+  is_complete: boolean;
+  position: number;
+}
+
 export interface MyTaskRow {
   id: string;
   name: string;
@@ -58,6 +65,7 @@ export interface MyTaskRow {
   due_date: string | null;
   project_id: string;
   projects: { name: string } | null;
+  action_items: MyTaskActionItem[];
 }
 
 export function sortMyTasks(

@@ -1,12 +1,15 @@
 import { createClient } from "@/libs/supabase/server";
 import { getProfile } from "@/libs/supabase/getProfile";
-import type { MyTaskRow } from "@/libs/taskSort";
+import type { MyTaskActionItem, MyTaskRow } from "@/libs/taskSort";
+import type { ActionItem } from "@/types/database";
 import MyTasksClient from "./MyTasksClient";
 
 export const dynamic = "force-dynamic";
 
-// "My tasks" across all projects (TSK-03). Read-only list; editing happens on
-// the owning project's detail page.
+type TaskQueryRow = Omit<MyTaskRow, "action_items">;
+
+// "My tasks" across all projects (TSK-03). Quick check-off on the list;
+// full editing on the task detail page or owning project.
 export default async function MyTasksPage() {
   const profile = await getProfile();
   if (!profile?.id) return null;
@@ -22,7 +25,35 @@ export default async function MyTasksPage() {
     .eq("task_assignees.profile_id", profile.id)
     .order("due_date", { ascending: true });
 
-  const tasks = (data as unknown as MyTaskRow[]) ?? [];
+  const taskRows = (data as unknown as TaskQueryRow[]) ?? [];
+  const taskIds = taskRows.map((t) => t.id);
+
+  let actionItems: ActionItem[] = [];
+  if (taskIds.length > 0) {
+    const { data: itemsData } = await supabase
+      .from("action_items")
+      .select("id, task_id, title, is_complete, position")
+      .in("task_id", taskIds)
+      .order("position", { ascending: true });
+    actionItems = (itemsData as ActionItem[]) ?? [];
+  }
+
+  const itemsByTask = new Map<string, MyTaskActionItem[]>();
+  for (const item of actionItems) {
+    const list = itemsByTask.get(item.task_id) ?? [];
+    list.push({
+      id: item.id,
+      title: item.title,
+      is_complete: item.is_complete,
+      position: item.position,
+    });
+    itemsByTask.set(item.task_id, list);
+  }
+
+  const tasks: MyTaskRow[] = taskRows.map((task) => ({
+    ...task,
+    action_items: itemsByTask.get(task.id) ?? [],
+  }));
 
   return (
     <main className="min-h-screen p-6 pb-24 lg:p-8">

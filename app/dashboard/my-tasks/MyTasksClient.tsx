@@ -2,19 +2,37 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
-import { TASK_STATUSES, taskStatusLabel, taskStatusBadgeClass } from "@/libs/status";
+import { createClient } from "@/libs/supabase/client";
+import { getErrorMessage } from "@/libs/getErrorMessage";
+import {
+  TASK_STATUSES,
+  taskStatusLabel,
+  taskStatusBadgeClass,
+} from "@/libs/status";
 import {
   sortMyTasks,
+  type MyTaskActionItem,
   type MyTaskRow,
   type SortDirection,
   type TaskSortColumn,
 } from "@/libs/taskSort";
+import type { TaskStatus } from "@/types/database";
+import toast from "react-hot-toast";
 
-export default function MyTasksClient({ tasks }: { tasks: MyTaskRow[] }) {
+export default function MyTasksClient({
+  tasks: initialTasks,
+}: {
+  tasks: MyTaskRow[];
+}) {
+  const supabase = createClient();
+
+  const [tasks, setTasks] = useState<MyTaskRow[]>(initialTasks);
   const [projectFilter, setProjectFilter] = useState<string>("");
   const [statusFilter, setStatusFilter] = useState<string>("");
   const [sortColumn, setSortColumn] = useState<TaskSortColumn>("due_date");
   const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
+  const [togglingTaskId, setTogglingTaskId] = useState<string | null>(null);
+  const [togglingItemId, setTogglingItemId] = useState<string | null>(null);
 
   const projectOptions = useMemo(() => {
     const byId = new Map<string, string>();
@@ -41,6 +59,82 @@ export default function MyTasksClient({ tasks }: { tasks: MyTaskRow[] }) {
 
     return sortMyTasks(filtered, sortColumn, sortDirection);
   }, [tasks, projectFilter, statusFilter, sortColumn, sortDirection]);
+
+  const updateTaskInState = (taskId: string, patch: Partial<MyTaskRow>) => {
+    setTasks((prev) =>
+      prev.map((t) => (t.id === taskId ? { ...t, ...patch } : t))
+    );
+  };
+
+  const updateActionItemInState = (
+    taskId: string,
+    itemId: string,
+    patch: Partial<MyTaskActionItem>
+  ) => {
+    setTasks((prev) =>
+      prev.map((t) =>
+        t.id === taskId
+          ? {
+              ...t,
+              action_items: t.action_items.map((item) =>
+                item.id === itemId ? { ...item, ...patch } : item
+              ),
+            }
+          : t
+      )
+    );
+  };
+
+  const toggleTaskComplete = async (task: MyTaskRow) => {
+    const nextStatus: TaskStatus =
+      task.status === "complete" ? "not_started" : "complete";
+    const previousStatus = task.status;
+
+    updateTaskInState(task.id, { status: nextStatus });
+    setTogglingTaskId(task.id);
+
+    try {
+      const { error } = await supabase
+        .from("tasks")
+        .update({ status: nextStatus })
+        .eq("id", task.id);
+      if (error) throw error;
+    } catch (error) {
+      updateTaskInState(task.id, { status: previousStatus });
+      console.error("toggle task failed:", getErrorMessage(error), error);
+      toast.error(getErrorMessage(error));
+    } finally {
+      setTogglingTaskId(null);
+    }
+  };
+
+  const toggleActionItem = async (
+    taskId: string,
+    item: MyTaskActionItem
+  ) => {
+    const nextComplete = !item.is_complete;
+
+    updateActionItemInState(taskId, item.id, {
+      is_complete: nextComplete,
+    });
+    setTogglingItemId(item.id);
+
+    try {
+      const { error } = await supabase
+        .from("action_items")
+        .update({ is_complete: nextComplete })
+        .eq("id", item.id);
+      if (error) throw error;
+    } catch (error) {
+      updateActionItemInState(taskId, item.id, {
+        is_complete: item.is_complete,
+      });
+      console.error("toggle action item failed:", getErrorMessage(error), error);
+      toast.error(getErrorMessage(error));
+    } finally {
+      setTogglingItemId(null);
+    }
+  };
 
   const handleSort = (column: TaskSortColumn) => {
     if (sortColumn === column) {
@@ -176,8 +270,59 @@ export default function MyTasksClient({ tasks }: { tasks: MyTaskRow[] }) {
               </thead>
               <tbody>
                 {visibleTasks.map((t) => (
-                  <tr key={t.id} className="hover">
-                    <td className="font-medium">{t.name}</td>
+                  <tr key={t.id} className="hover align-top">
+                    <td>
+                      <div className="flex items-start gap-2">
+                        <input
+                          type="checkbox"
+                          className="checkbox checkbox-sm mt-0.5"
+                          checked={t.status === "complete"}
+                          disabled={togglingTaskId === t.id}
+                          aria-label={`Mark "${t.name}" complete`}
+                          onChange={() => toggleTaskComplete(t)}
+                        />
+                        <div className="min-w-0 flex-1">
+                          <Link
+                            href={`/dashboard/tasks/${t.id}`}
+                            className={`link link-hover font-medium ${
+                              t.status === "complete"
+                                ? "line-through text-base-content/60"
+                                : ""
+                            }`}
+                          >
+                            {t.name}
+                          </Link>
+                          {t.action_items.length > 0 && (
+                            <ul className="mt-2 space-y-1 border-l-2 border-base-300 pl-3">
+                              {t.action_items.map((item) => (
+                                <li
+                                  key={item.id}
+                                  className="flex items-center gap-2 text-sm font-normal text-base-content/80"
+                                >
+                                  <input
+                                    type="checkbox"
+                                    className="checkbox checkbox-xs"
+                                    checked={item.is_complete}
+                                    disabled={togglingItemId === item.id}
+                                    aria-label={item.title}
+                                    onChange={() => toggleActionItem(t.id, item)}
+                                  />
+                                  <span
+                                    className={
+                                      item.is_complete
+                                        ? "line-through text-base-content/50"
+                                        : ""
+                                    }
+                                  >
+                                    {item.title}
+                                  </span>
+                                </li>
+                              ))}
+                            </ul>
+                          )}
+                        </div>
+                      </div>
+                    </td>
                     <td className="text-sm">
                       <Link
                         href={`/dashboard/projects/${t.project_id}`}
