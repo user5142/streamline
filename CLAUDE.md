@@ -104,24 +104,6 @@ Do not introduce any of the above unless the requirements document is updated fi
 - Rely on RLS for data isolation (never filter by org in the app layer alone)
 - Follow OWASP guidelines; sanitize before any write operation
 
-## Prompt logging
-
-Every time the user submits a prompt, append an entry to `PROMPTS.md` with:
-- The model used (e.g., `Claude Sonnet 4.6`)
-- The user's exact input as a blockquote
-
-Use this format:
-
-```
----
-
-**Model:** <model name>
-
-> <user prompt>
-```
-
-Do this before responding to the prompt.
-
 ## Key implementation notes
 
 - Gantt chart is a core feature (company-wide + filter by team + filter by person + task-level bars). Use **Frappe Gantt** — do not build a custom renderer.
