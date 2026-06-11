@@ -57,7 +57,7 @@
 @theme {
   /* Wire next/font faces to Tailwind's font utilities */
   --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
-  --font-display: var(--font-space-grotesk), var(--font-inter), sans-serif;
+  --font-display: var(--font-manrope), var(--font-inter), sans-serif;
 
   /* Raw palette tokens for custom elements (gradients, the Gantt motif) */
   --color-brand: #811844;

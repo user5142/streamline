@@ -1,5 +1,5 @@
 import { ReactNode } from "react";
-import { Inter, Space_Grotesk } from "next/font/google";
+import { Inter, Manrope } from "next/font/google";
 import { Viewport } from "next";
 import { getSEOTags } from "@/libs/seo";
 import { Analytics } from "@vercel/analytics/next"
@@ -14,12 +14,11 @@ const inter = Inter({
   display: "swap",
 });
 
-// Display face — used with restraint on headlines and the wordmark. Its slightly
-// quirky grotesque shapes give Streamline a distinct voice without going corporate.
-const spaceGrotesk = Space_Grotesk({
+// Display face — used with restraint on headlines and the wordmark.
+const manrope = Manrope({
   subsets: ["latin"],
   weight: ["500", "600", "700"],
-  variable: "--font-space-grotesk",
+  variable: "--font-manrope",
   display: "swap",
 });
 
@@ -39,7 +38,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
 		<html
 			lang="en"
 			data-theme={config.colors.theme}
-			className={`${inter.variable} ${spaceGrotesk.variable} font-sans`}
+			className={`${inter.variable} ${manrope.variable} font-sans`}
 		>
 			<body>
 				{/* ClientLayout contains all the client wrappers (Crisp chat support, toast messages, tooltips, etc.) */}
