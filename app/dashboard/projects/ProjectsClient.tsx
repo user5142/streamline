@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback, FormEvent } from "react";
+import { useState, useEffect, useCallback, useMemo, FormEvent } from "react";
 import Link from "next/link";
 import { createClient } from "@/libs/supabase/client";
 import { getErrorMessage } from "@/libs/getErrorMessage";
@@ -12,6 +12,35 @@ import {
 import toast from "react-hot-toast";
 import { memberDisplayLabel, type OrgMember } from "@/libs/orgMember";
 import type { Project, Team } from "@/types/database";
+
+type SortColumn =
+  | "name"
+  | "team"
+  | "owner"
+  | "status"
+  | "start_date"
+  | "target"
+  | "actual";
+type SortDirection = "asc" | "desc";
+
+const STATUS_SORT_ORDER = new Map(
+  PROJECT_STATUSES.map((s, i) => [s.value, i])
+);
+
+function compareStrings(a: string, b: string, dir: number): number {
+  return a.localeCompare(b, undefined, { sensitivity: "base" }) * dir;
+}
+
+function compareDates(
+  a: string | null,
+  b: string | null,
+  dir: number
+): number {
+  if (!a && !b) return 0;
+  if (!a) return 1;
+  if (!b) return -1;
+  return (new Date(a).getTime() - new Date(b).getTime()) * dir;
+}
 
 export default function ProjectsClient({ orgId }: { orgId: string }) {
   const supabase = createClient();
@@ -32,6 +61,12 @@ export default function ProjectsClient({ orgId }: { orgId: string }) {
   const [targetDate, setTargetDate] = useState<string>("");
   const [budget, setBudget] = useState<string>("");
   const [status, setStatus] = useState<string>("not_started");
+
+  const [teamFilter, setTeamFilter] = useState<string>("");
+  const [ownerFilter, setOwnerFilter] = useState<string>("");
+  const [statusFilter, setStatusFilter] = useState<string>("");
+  const [sortColumn, setSortColumn] = useState<SortColumn>("name");
+  const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
 
   const loadAll = useCallback(async () => {
     const [p, t, m] = await Promise.all([
@@ -75,6 +110,107 @@ export default function ProjectsClient({ orgId }: { orgId: string }) {
     const m = members.find((x) => x.id === id);
     return m ? memberDisplayLabel(m) : "—";
   };
+
+  const hasActiveFilters = Boolean(teamFilter || ownerFilter || statusFilter);
+
+  const visibleProjects = useMemo(() => {
+    const dir = sortDirection === "asc" ? 1 : -1;
+
+    const filtered = projects.filter((p) => {
+      if (teamFilter && p.team_id !== teamFilter) return false;
+      if (ownerFilter && p.owner_id !== ownerFilter) return false;
+      if (statusFilter && p.status !== statusFilter) return false;
+      return true;
+    });
+
+    return [...filtered].sort((a, b) => {
+      switch (sortColumn) {
+        case "name":
+          return compareStrings(a.name, b.name, dir);
+        case "team":
+          return compareStrings(teamName(a.team_id), teamName(b.team_id), dir);
+        case "owner":
+          return compareStrings(
+            memberName(a.owner_id),
+            memberName(b.owner_id),
+            dir
+          );
+        case "status": {
+          const aOrder = STATUS_SORT_ORDER.get(a.status) ?? 999;
+          const bOrder = STATUS_SORT_ORDER.get(b.status) ?? 999;
+          return (aOrder - bOrder) * dir;
+        }
+        case "start_date":
+          return compareDates(a.start_date, b.start_date, dir);
+        case "target":
+          return compareDates(
+            a.target_completion_date,
+            b.target_completion_date,
+            dir
+          );
+        case "actual":
+          return compareDates(
+            a.actual_completion_date,
+            b.actual_completion_date,
+            dir
+          );
+        default:
+          return 0;
+      }
+    });
+  }, [
+    projects,
+    teamFilter,
+    ownerFilter,
+    statusFilter,
+    sortColumn,
+    sortDirection,
+    teams,
+    members,
+  ]);
+
+  const handleSort = (column: SortColumn) => {
+    if (sortColumn === column) {
+      setSortDirection((d) => (d === "asc" ? "desc" : "asc"));
+    } else {
+      setSortColumn(column);
+      setSortDirection("asc");
+    }
+  };
+
+  const clearFilters = () => {
+    setTeamFilter("");
+    setOwnerFilter("");
+    setStatusFilter("");
+  };
+
+  const SortHeader = ({
+    column,
+    label,
+  }: {
+    column: SortColumn;
+    label: string;
+  }) => (
+    <th>
+      <button
+        type="button"
+        className="flex items-center gap-1 font-semibold hover:text-base-content"
+        onClick={() => handleSort(column)}
+      >
+        {label}
+        <span
+          className={
+            sortColumn === column
+              ? "text-base-content"
+              : "text-base-content/30"
+          }
+          aria-hidden="true"
+        >
+          {sortColumn === column ? (sortDirection === "asc" ? "↑" : "↓") : "↕"}
+        </span>
+      </button>
+    </th>
+  );
 
   const resetForm = () => {
     setName("");
@@ -134,7 +270,9 @@ export default function ProjectsClient({ orgId }: { orgId: string }) {
     <div className="space-y-6">
       <div className="flex items-center justify-between gap-4">
         <p className="text-sm text-base-content/60">
-          {projects.length} {projects.length === 1 ? "project" : "projects"}
+          {hasActiveFilters
+            ? `${visibleProjects.length} of ${projects.length} projects`
+            : `${projects.length} ${projects.length === 1 ? "project" : "projects"}`}
         </p>
         <button
           className="btn btn-primary"
@@ -289,22 +427,95 @@ export default function ProjectsClient({ orgId }: { orgId: string }) {
             New project
           </button>
         </div>
+      ) : visibleProjects.length === 0 ? (
+        <div className="rounded-2xl border border-dashed border-base-300 bg-base-100 px-6 py-16 text-center">
+          <p className="font-display text-lg font-semibold text-base-content">
+            No projects match your filters
+          </p>
+          <p className="mx-auto mt-1 max-w-sm text-sm text-base-content/60">
+            Try changing the team, owner, or status filters.
+          </p>
+          <button className="btn btn-ghost mt-5" onClick={clearFilters}>
+            Clear filters
+          </button>
+        </div>
       ) : (
-        <div className="overflow-hidden rounded-2xl border border-base-300 bg-base-100">
-          <table className="table">
-            <thead className="bg-base-200 text-xs uppercase tracking-wide text-base-content/50">
-              <tr>
-                <th>Name</th>
-                <th>Team</th>
-                <th>Owner</th>
-                <th>Status</th>
-                <th>Start Date</th>
-                <th>Target</th>
-                <th>Actual</th>
-              </tr>
-            </thead>
-            <tbody>
-              {projects.map((p) => (
+        <div className="space-y-4">
+          <div className="flex flex-wrap items-end gap-4">
+            <label className="form-control">
+              <span className="label-text mb-1">Team</span>
+              <select
+                value={teamFilter}
+                className="select select-bordered select-sm"
+                onChange={(e) => setTeamFilter(e.target.value)}
+              >
+                <option value="">All teams</option>
+                {teams.map((t) => (
+                  <option key={t.id} value={t.id}>
+                    {t.name}
+                  </option>
+                ))}
+              </select>
+            </label>
+
+            <label className="form-control">
+              <span className="label-text mb-1">Owner</span>
+              <select
+                value={ownerFilter}
+                className="select select-bordered select-sm"
+                onChange={(e) => setOwnerFilter(e.target.value)}
+              >
+                <option value="">All owners</option>
+                {members.map((m) => (
+                  <option key={m.id} value={m.id}>
+                    {memberDisplayLabel(m)}
+                  </option>
+                ))}
+              </select>
+            </label>
+
+            <label className="form-control">
+              <span className="label-text mb-1">Status</span>
+              <select
+                value={statusFilter}
+                className="select select-bordered select-sm"
+                onChange={(e) => setStatusFilter(e.target.value)}
+              >
+                <option value="">All statuses</option>
+                {PROJECT_STATUSES.map((s) => (
+                  <option key={s.value} value={s.value}>
+                    {s.label}
+                  </option>
+                ))}
+              </select>
+            </label>
+
+            {hasActiveFilters && (
+              <button
+                type="button"
+                className="btn btn-ghost btn-sm"
+                onClick={clearFilters}
+              >
+                Clear filters
+              </button>
+            )}
+          </div>
+
+          <div className="overflow-hidden rounded-2xl border border-base-300 bg-base-100">
+            <table className="table">
+              <thead className="bg-base-200 text-xs uppercase tracking-wide text-base-content/50">
+                <tr>
+                  <SortHeader column="name" label="Name" />
+                  <SortHeader column="team" label="Team" />
+                  <SortHeader column="owner" label="Owner" />
+                  <SortHeader column="status" label="Status" />
+                  <SortHeader column="start_date" label="Start Date" />
+                  <SortHeader column="target" label="Target" />
+                  <SortHeader column="actual" label="Actual" />
+                </tr>
+              </thead>
+              <tbody>
+                {visibleProjects.map((p) => (
                 <tr key={p.id} className="hover">
                   <td>
                     <Link
@@ -344,8 +555,9 @@ export default function ProjectsClient({ orgId }: { orgId: string }) {
                   </td>
                 </tr>
               ))}
-            </tbody>
-          </table>
+              </tbody>
+            </table>
+          </div>
         </div>
       )}
     </div>
