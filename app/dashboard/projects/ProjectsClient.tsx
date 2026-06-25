@@ -495,9 +495,18 @@ export default function ProjectsClient({ orgId }: { orgId: string }) {
                       </Link>
                       {!p.show_on_gantt && (
                         <span
-                          className="badge badge-ghost badge-sm"
+                          className="inline-flex shrink-0 items-center gap-1 whitespace-nowrap rounded-full border border-base-300 bg-base-200 px-2 py-0.5 text-[11px] font-medium text-base-content/50"
                           title="Not tracked on the Gantt timeline"
                         >
+                          <svg
+                            viewBox="0 0 20 20"
+                            fill="currentColor"
+                            className="h-3 w-3"
+                            aria-hidden="true"
+                          >
+                            <path d="M3.28 2.22a.75.75 0 0 0-1.06 1.06l14.5 14.5a.75.75 0 1 0 1.06-1.06l-1.745-1.745a10.03 10.03 0 0 0 3.057-4.475.75.75 0 0 0 0-.485A10.02 10.02 0 0 0 10 3.5c-1.146 0-2.243.193-3.262.546L3.28 2.22ZM7.752 6.69l1.092 1.092a2.5 2.5 0 0 1 3.374 3.373l1.091 1.092a4 4 0 0 0-5.557-5.557Z" />
+                            <path d="m10.748 13.93 2.523 2.523a9.987 9.987 0 0 1-3.27.547c-4.258 0-7.894-2.66-9.337-6.41a.75.75 0 0 1 0-.485 10.01 10.01 0 0 1 2.523-3.694l3.117 3.117a4 4 0 0 0 4.444 4.445Z" />
+                          </svg>
                           Off Gantt
                         </span>
                       )}
