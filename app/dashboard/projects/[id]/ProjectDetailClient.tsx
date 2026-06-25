@@ -243,7 +243,7 @@ export default function ProjectDetailClient({
             </span>
             <input
               type="checkbox"
-              className="toggle toggle-primary"
+              className="toggle toggle-primary toggle-solid"
               checked={showOnGantt}
               onChange={(e) => setShowOnGantt(e.target.checked)}
             />

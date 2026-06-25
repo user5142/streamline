@@ -226,6 +226,20 @@ h1, h2, h3, h4, .font-display {
   border-color: #f6cfd8;
 }
 
+/* ── Solid-fill toggle ────────────────────────────────────────────────────────
+   DaisyUI 5's checked toggle is "outlined": the track stays base-100 (white)
+   while the border + knob take the accent color. This modifier inverts that so
+   the track fills solid with the color and the knob turns white — a clearer
+   on-state for the Gantt tracking switch. Pair with a color (e.g. toggle-primary). */
+.toggle-solid:checked,
+.toggle-solid[aria-checked="true"] {
+  background-color: var(--input-color);
+}
+.toggle-solid:checked::before,
+.toggle-solid[aria-checked="true"]::before {
+  background-color: var(--color-base-100);
+}
+
 /* ── Card lift on hover for interactive surfaces ──────────────────────────── */
 .card-lift {
   transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;

@@ -348,7 +348,7 @@ export default function ProjectsClient({ orgId }: { orgId: string }) {
                 <label className="flex cursor-pointer items-start gap-3">
                   <input
                     type="checkbox"
-                    className="toggle toggle-primary mt-0.5"
+                    className="toggle toggle-primary toggle-solid mt-0.5"
                     checked={showOnGantt}
                     onChange={(e) => setShowOnGantt(e.target.checked)}
                   />
