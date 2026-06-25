@@ -64,6 +64,10 @@ export default function GanttView() {
 
   const containerRef = useRef<HTMLDivElement>(null);
   const ganttRef = useRef<Gantt | null>(null);
+  // The view mode of the last chart we rendered. Used to decide whether a
+  // rebuild should re-center on "today" (first load / view-mode change) or
+  // preserve the user's current horizontal scroll (expand/collapse rebuilds).
+  const lastViewModeRef = useRef<ViewMode | null>(null);
 
   const [projects, setProjects] = useState<Project[]>([]);
   const [tasks, setTasks] = useState<Task[]>([]);
@@ -293,6 +297,12 @@ export default function GanttView() {
       }
     };
 
+    // Capture the current horizontal scroll before teardown so expand/collapse
+    // rebuilds (same view mode) can restore it instead of jumping to center.
+    const prevScroller =
+      container.querySelector<HTMLElement>(".gantt-container");
+    const prevScrollLeft = prevScroller ? prevScroller.scrollLeft : null;
+
     // Recreate on each change so the click closure always sees current state.
     container.innerHTML = "";
     ganttRef.current = new Gantt(container, bars, {
@@ -303,6 +313,9 @@ export default function GanttView() {
       // Fixed timeline padding (no scroll-driven re-renders) so the post-render
       // "snap overdue tail to today" tweak below isn't wiped out on scroll.
       infinite_padding: false,
+      // Suppress frappe's default smooth scroll-to-today (it parks today near
+      // the left edge). We position the scroll ourselves in position() below.
+      scroll_to: null,
       // Show the project/task's real completion % — the visible `progress` is
       // repurposed to size the two-tone overdue bar, so read `_progressLabel`.
       popup: (ctx) => {
@@ -352,12 +365,48 @@ export default function GanttView() {
     };
     requestAnimationFrame(snapOverdueToToday);
 
+    // Position the timeline. On first load / view-mode change we center the
+    // "today" marker (equal past and future visible); on same-view-mode rebuilds
+    // (expand/collapse, and React Strict Mode's dev double-mount) we restore the
+    // prior scroll so nothing jumps. With scroll_to:null frappe's own scroll is a
+    // no-op, so setting scrollLeft here — synchronously, before paint — sticks
+    // without any competing animation and without a visible left→center hop.
+    const recenter = lastViewModeRef.current !== viewMode;
+    const position = (): boolean => {
+      const scroller = container.querySelector<HTMLElement>(".gantt-container");
+      if (!scroller || scroller.clientWidth === 0) return false;
+      if (!recenter && prevScrollLeft != null) {
+        scroller.scrollLeft = prevScrollLeft;
+        lastViewModeRef.current = viewMode;
+        return true;
+      }
+      const todayLine =
+        container.querySelector<HTMLElement>(".current-highlight");
+      const todayX = todayLine ? parseFloat(todayLine.style.left || "") : NaN;
+      if (!Number.isFinite(todayX)) return false;
+      scroller.scrollLeft = Math.max(0, todayX - scroller.clientWidth / 2);
+      lastViewModeRef.current = viewMode;
+      return true;
+    };
+
+    // Try synchronously (forces layout, usually succeeds → no flicker); fall back
+    // to a frame-by-frame retry only if the grid hasn't been measured yet.
+    let centerRaf = 0;
+    if (!position()) {
+      let frames = 0;
+      const attempt = () => {
+        if (position()) return;
+        if (frames++ < 10) centerRaf = requestAnimationFrame(attempt);
+      };
+      centerRaf = requestAnimationFrame(attempt);
+    }
+
     // Scroll UX: let vertical wheel events use the browser's native page-scroll
     // physics. The only custom work here is preventing wheel/trackpad input from
     // nudging the horizontal timeline; users can still pan dates with the
     // visible scrollbar.
     const scroller = container.querySelector<HTMLElement>(".gantt-container");
-    if (!scroller) return;
+    if (!scroller) return () => cancelAnimationFrame(centerRaf);
 
     const onWheel = (e: WheelEvent) => {
       if (e.ctrlKey) return;
@@ -375,6 +424,7 @@ export default function GanttView() {
     scroller.addEventListener("wheel", onWheel, { passive: false });
 
     return () => {
+      cancelAnimationFrame(centerRaf);
       scroller.removeEventListener("wheel", onWheel);
     };
   }, [bars, viewMode, tasks, toggleExpanded, router]);
