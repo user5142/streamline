@@ -71,6 +71,8 @@ export interface Project {
   start_date: string | null;
   target_completion_date: string | null;
   actual_completion_date: string | null;
+  /** When false, the project is hidden from the company-wide Gantt timeline. */
+  show_on_gantt: boolean;
   created_at: string;
 }
 

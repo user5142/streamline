@@ -135,6 +135,8 @@ export default function GanttView() {
   // Build the flat bar list for Frappe Gantt from the current filters/expansion.
   const bars = useMemo<FrappeTask[]>(() => {
     const filtered = projects.filter((p) => {
+      // Per-project opt-out: only projects flagged for the Gantt are shown.
+      if (!p.show_on_gantt) return false;
       if (teamFilter && p.team_id !== teamFilter) return false;
       if (personProjectIds && !personProjectIds.has(p.id)) return false;
       return true;

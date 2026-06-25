@@ -37,6 +37,7 @@ export default function ProjectsClient({ orgId }: { orgId: string }) {
   const [targetDate, setTargetDate] = useState<string>("");
   const [budget, setBudget] = useState<string>("");
   const [status, setStatus] = useState<string>("not_started");
+  const [showOnGantt, setShowOnGantt] = useState<boolean>(true);
 
   const [teamFilter, setTeamFilter] = useState<string>("");
   const [ownerFilter, setOwnerFilter] = useState<string>("");
@@ -167,6 +168,7 @@ export default function ProjectsClient({ orgId }: { orgId: string }) {
     setTargetDate("");
     setBudget("");
     setStatus("not_started");
+    setShowOnGantt(true);
   };
 
   const handleCreate = async (e: FormEvent) => {
@@ -184,6 +186,7 @@ export default function ProjectsClient({ orgId }: { orgId: string }) {
         target_completion_date: targetDate || null,
         budget: budget ? Number(budget) : null,
         status,
+        show_on_gantt: showOnGantt,
       };
       const { data, error } = await supabase
         .from("projects")
@@ -341,6 +344,25 @@ export default function ProjectsClient({ orgId }: { orgId: string }) {
                   onChange={(e) => setDescription(e.target.value)}
                 />
               </label>
+              <div className="rounded-lg border border-base-300 bg-base-200/40 px-4 py-3">
+                <label className="flex cursor-pointer items-start gap-3">
+                  <input
+                    type="checkbox"
+                    className="toggle toggle-primary mt-0.5"
+                    checked={showOnGantt}
+                    onChange={(e) => setShowOnGantt(e.target.checked)}
+                  />
+                  <span>
+                    <span className="label-text font-medium">
+                      Track on Gantt timeline
+                    </span>
+                    <span className="block text-sm text-base-content/60">
+                      Show this project on the company-wide Gantt chart. You can
+                      change this later from the project page.
+                    </span>
+                  </span>
+                </label>
+              </div>
               <div className="flex justify-end">
                 <button
                   type="submit"
@@ -464,12 +486,22 @@ export default function ProjectsClient({ orgId }: { orgId: string }) {
                 {visibleProjects.map((p) => (
                 <tr key={p.id} className="hover">
                   <td>
-                    <Link
-                      href={`/dashboard/projects/${p.id}`}
-                      className="link link-hover font-medium"
-                    >
-                      {p.name}
-                    </Link>
+                    <div className="flex items-center gap-2">
+                      <Link
+                        href={`/dashboard/projects/${p.id}`}
+                        className="link link-hover font-medium"
+                      >
+                        {p.name}
+                      </Link>
+                      {!p.show_on_gantt && (
+                        <span
+                          className="badge badge-ghost badge-sm"
+                          title="Not tracked on the Gantt timeline"
+                        >
+                          Off Gantt
+                        </span>
+                      )}
+                    </div>
                   </td>
                   <td className="text-sm">{teamName(p.team_id)}</td>
                   <td className="text-sm">{memberName(p.owner_id)}</td>

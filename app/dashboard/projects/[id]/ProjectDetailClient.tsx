@@ -45,6 +45,9 @@ export default function ProjectDetailClient({
   const [budget, setBudget] = useState<string>(
     project.budget != null ? String(project.budget) : ""
   );
+  const [showOnGantt, setShowOnGantt] = useState<boolean>(
+    project.show_on_gantt
+  );
   const [isSaving, setIsSaving] = useState<boolean>(false);
 
   const handleStatusChange = (nextStatus: string) => {
@@ -69,6 +72,7 @@ export default function ProjectDetailClient({
         target_completion_date: targetDate || null,
         actual_completion_date: actualDate || null,
         budget: budget ? Number(budget) : null,
+        show_on_gantt: showOnGantt,
       };
       const { error } = await supabase
         .from("projects")
@@ -220,6 +224,29 @@ export default function ProjectDetailClient({
             <p className="mt-1 text-sm text-base-content/50">
               Set when the project is finished.
             </p>
+          </label>
+        </div>
+      </div>
+
+      <div className="card bg-base-100 border border-base-300">
+        <div className="card-body">
+          <label className="flex cursor-pointer items-start justify-between gap-4">
+            <span>
+              <span className="label-text font-medium">
+                Track on Gantt timeline
+              </span>
+              <span className="block text-sm text-base-content/60">
+                {showOnGantt
+                  ? "This project appears on the company-wide Gantt chart."
+                  : "This project is hidden from the Gantt chart."}
+              </span>
+            </span>
+            <input
+              type="checkbox"
+              className="toggle toggle-primary"
+              checked={showOnGantt}
+              onChange={(e) => setShowOnGantt(e.target.checked)}
+            />
           </label>
         </div>
       </div>
