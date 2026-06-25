@@ -1,5 +1,5 @@
+import Image from "next/image";
 import Link from "next/link";
-import AppPreview from "./AppPreview";
 import config from "@/config";
 
 const TRUST = [
@@ -79,14 +79,21 @@ const Hero = () => {
           </ul>
         </div>
 
-        {/* Signature: the live Gantt mock, shown large and product-led */}
+        {/* Signature: the product screenshot, shown large and product-led */}
         <div className="relative mx-auto mt-16 max-w-5xl animate-rise [animation-delay:0.12s] lg:mt-20">
           {/* Soft brand glow behind the frame */}
           <div
             className="absolute -inset-x-6 -top-6 bottom-0 -z-10 rounded-[2.5rem] bg-primary/5 blur-2xl"
             aria-hidden="true"
           />
-          <AppPreview />
+          <Image
+            src="/streamline-dashboard.png"
+            alt="Streamline Gantt timeline dashboard"
+            width={1024}
+            height={549}
+            priority
+            className="h-auto w-full rounded-2xl border border-base-300 bg-base-100 shadow-[var(--shadow-lift)]"
+          />
         </div>
       </div>
     </section>
