@@ -31,6 +31,9 @@ const STATUS_LEGEND: { value: string; label: string; color: string }[] = [
   { value: "complete", label: "Complete", color: "#059669" },
   { value: "on_hold", label: "On hold", color: "#b45309" },
   { value: "blocked", label: "Blocked", color: "#be123c" },
+  // Modifier (not a status): the lighter tail a project bar grows past its
+  // target completion date until it's actually completed.
+  { value: "overdue", label: "Past target", color: "#f0c9a8" },
 ];
 
 const today = (): string => new Date().toISOString().slice(0, 10);
@@ -40,6 +43,10 @@ const addDays = (dateStr: string, n: number): string => {
   d.setDate(d.getDate() + n);
   return d.toISOString().slice(0, 10);
 };
+
+const daysBetween = (a: string, b: string): number =>
+  (new Date(b + "T00:00:00").getTime() - new Date(a + "T00:00:00").getTime()) /
+  86_400_000;
 
 // Frappe needs a positive-width bar; ensure end is strictly after start.
 const normalizeRange = (
@@ -154,17 +161,55 @@ export default function GanttView() {
 
     const result: FrappeTask[] = [];
 
+    const todayStr = today();
+
     for (const p of visibleProjects) {
       const pStartRaw =
         p.start_date ||
         p.target_completion_date ||
         p.actual_completion_date ||
-        today();
-      const pEndRaw =
-        p.actual_completion_date ||
-        p.target_completion_date ||
-        p.start_date ||
-        pStartRaw;
+        todayStr;
+      const target = p.target_completion_date;
+      const actual = p.actual_completion_date;
+
+      // Two-tone "overdue" bars reuse frappe-gantt's track + progress layers:
+      // the saturated status color fills start→target (.bar-progress), while
+      // the lighter "past target" tail target→end shows through (.bar). We do
+      // that by repurposing `progress` as the on-time fraction of the bar.
+      let pEndRaw: string;
+      let progress = progressFor(p.status);
+      // Single CSS token only — frappe-gantt calls classList.add(custom_class)
+      // which throws on space-separated tokens. "gp-" = gantt project.
+      let customClass = `gp-${p.status}`;
+
+      const overrun = (to: string) => {
+        const total = daysBetween(pStartRaw, to);
+        progress =
+          total > 0
+            ? Math.round((daysBetween(pStartRaw, target!) / total) * 100)
+            : 0;
+        customClass = `gp-overdue-${p.status}`;
+      };
+
+      // Running-overdue bars extend to today; their right edge is snapped flush
+      // to the today marker after render (frappe's bar-width vs marker math
+      // don't line up exactly across view modes).
+      let clampToToday = false;
+
+      if (actual) {
+        // Completed: the bar always stops at the actual completion date. If it
+        // finished after target, show the target→actual span as the tail.
+        pEndRaw = actual;
+        if (target && actual > target && pStartRaw <= target) overrun(actual);
+      } else if (target && todayStr > target && pStartRaw <= target) {
+        // Overdue and still running: continue the bar to today, tail past target.
+        pEndRaw = todayStr;
+        overrun(todayStr);
+        clampToToday = true;
+      } else {
+        pEndRaw = target || p.start_date || pStartRaw;
+      }
+
       const { start, end } = normalizeRange(pStartRaw, pEndRaw);
 
       result.push({
@@ -172,10 +217,12 @@ export default function GanttView() {
         name: p.name,
         start,
         end,
-        progress: progressFor(p.status),
-        // Single CSS token only — frappe-gantt calls classList.add(custom_class)
-        // which throws on space-separated tokens. "gp-" = gantt project.
-        custom_class: `gp-${p.status}`,
+        progress,
+        custom_class: customClass,
+        // True completion % for the popup (visible `progress` is repurposed
+        // above to size the two-tone overdue bar).
+        _progressLabel: progressFor(p.status),
+        _clampToToday: clampToToday,
       });
 
       if (!expanded.has(p.id)) continue;
@@ -203,6 +250,7 @@ export default function GanttView() {
           progress: progressFor(t.status),
           // "gt-" = gantt task (single token; see project note above).
           custom_class: `gt-${t.status}`,
+          _progressLabel: progressFor(t.status),
         });
       }
     }
@@ -252,6 +300,28 @@ export default function GanttView() {
       readonly: true,
       popup_on: "hover",
       on_click: handleClick,
+      // Fixed timeline padding (no scroll-driven re-renders) so the post-render
+      // "snap overdue tail to today" tweak below isn't wiped out on scroll.
+      infinite_padding: false,
+      // Show the project/task's real completion % — the visible `progress` is
+      // repurposed to size the two-tone overdue bar, so read `_progressLabel`.
+      popup: (ctx) => {
+        const t = ctx.task;
+        ctx.set_title(t.name.replace(/^[\s↳]+/, ""));
+        ctx.set_subtitle("");
+        const start = t._start instanceof Date ? t._start : new Date(t.start);
+        const rawEnd = t._end instanceof Date ? t._end : new Date(t.end);
+        // frappe's _end is exclusive (00:00 of the day after); show last day.
+        const lastDay = new Date(rawEnd.getTime() - 1000);
+        const end = lastDay >= start ? lastDay : start;
+        const fmt = (d: Date) =>
+          d.toLocaleDateString(undefined, { month: "short", day: "numeric" });
+        const pct =
+          typeof t._progressLabel === "number"
+            ? t._progressLabel
+            : Math.round(t.progress ?? 0);
+        ctx.set_details(`${fmt(start)} – ${fmt(end)}<br/>Progress: ${pct}%`);
+      },
       // Roomier, more refined bar geometry than the stock defaults.
       bar_height: 26,
       bar_corner_radius: 4,
@@ -259,6 +329,28 @@ export default function GanttView() {
       // Horizontal-only grid lines read cleaner than the full grid.
       lines: "horizontal",
     });
+
+    // Snap each running-overdue bar's right edge exactly to the today marker.
+    // frappe sizes bars by day-count but positions the today line by a
+    // fractional date diff, so the amber tail can overshoot/undershoot the
+    // line by a few px; align them precisely against the rendered marker.
+    const snapOverdueToToday = () => {
+      const todayLine =
+        container.querySelector<HTMLElement>(".current-highlight");
+      if (!todayLine) return;
+      const todayX = parseFloat(todayLine.style.left || "");
+      if (!Number.isFinite(todayX)) return;
+      for (const bar of bars) {
+        if (!bar._clampToToday) continue;
+        const rect = container.querySelector<SVGRectElement>(
+          `.bar-wrapper[data-id="${bar.id}"] .bar`
+        );
+        if (!rect) continue;
+        const x = parseFloat(rect.getAttribute("x") || "0");
+        if (todayX > x) rect.setAttribute("width", String(todayX - x));
+      }
+    };
+    requestAnimationFrame(snapOverdueToToday);
 
     // Scroll UX: let vertical wheel events use the browser's native page-scroll
     // physics. The only custom work here is preventing wheel/trackpad input from

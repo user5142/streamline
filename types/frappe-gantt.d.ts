@@ -9,6 +9,26 @@ declare module "frappe-gantt" {
     dependencies?: string;
     custom_class?: string;
     description?: string;
+    // frappe parses these onto the task at render time.
+    _start?: Date;
+    _end?: Date;
+    // Streamline extensions: `_progressLabel` is the true completion % shown in
+    // the popup (the visible `progress` is repurposed for the two-tone overdue
+    // bar), and `_clampToToday` flags bars whose right edge is snapped to the
+    // today marker after render.
+    _progressLabel?: number;
+    _clampToToday?: boolean;
+  }
+
+  export interface FrappePopupContext {
+    task: FrappeTask;
+    chart: Gantt;
+    get_title: () => HTMLElement;
+    set_title: (html: string) => void;
+    get_subtitle: () => HTMLElement;
+    set_subtitle: (html: string) => void;
+    get_details: () => HTMLElement;
+    set_details: (html: string) => void;
   }
 
   export interface FrappeOptions {
@@ -17,6 +37,8 @@ declare module "frappe-gantt" {
     popup_on?: "click" | "hover";
     on_click?: (task: FrappeTask) => void;
     today_button?: boolean;
+    infinite_padding?: boolean;
+    popup?: (ctx: FrappePopupContext) => void | string;
     [key: string]: unknown;
   }
 

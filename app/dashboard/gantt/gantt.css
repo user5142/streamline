@@ -56,6 +56,29 @@
   fill: #be123c;
 }
 
+/* Past target ("overdue") — a project that ran past its target completion date.
+   The bar continues to today (or to its actual completion date if it finished
+   late) and the portion BEYOND the target reads as a light amber tail. We reuse
+   the track/progress pairing: the `.bar` track carries the warning amber, while
+   `.bar-progress` (sized to the on-time fraction in GanttView) keeps the
+   project's normal status color for the start→target span. */
+.gantt [class^="gp-overdue-"] .bar,
+.gantt [class*=" gp-overdue-"] .bar {
+  fill: #f0c9a8;
+}
+.gantt .gp-overdue-not_started .bar-progress {
+  fill: #cdc0c7;
+}
+.gantt .gp-overdue-in_progress .bar-progress {
+  fill: #811844;
+}
+.gantt .gp-overdue-on_hold .bar-progress {
+  fill: #b45309;
+}
+.gantt .gp-overdue-complete .bar-progress {
+  fill: #059669;
+}
+
 /* Task (sub) bars render lighter so the project/task hierarchy is legible when
    a project is expanded. */
 .gantt [class^="gt-"] .bar,
@@ -80,7 +103,10 @@
 .gantt .gp-complete .bar-label:not(.big),
 .gantt .gt-complete .bar-label:not(.big),
 .gantt .gp-on_hold .bar-label:not(.big),
-.gantt .gt-blocked .bar-label:not(.big) {
+.gantt .gt-blocked .bar-label:not(.big),
+.gantt .gp-overdue-in_progress .bar-label:not(.big),
+.gantt .gp-overdue-on_hold .bar-label:not(.big),
+.gantt .gp-overdue-complete .bar-label:not(.big) {
   fill: #ffffff;
   font-weight: 500;
   paint-order: stroke;
