@@ -14,6 +14,7 @@ import {
   type ProjectSortColumn,
   type SortDirection,
 } from "@/libs/projectSort";
+import { assignedProjectIds } from "@/libs/projectInvolvement";
 import toast from "react-hot-toast";
 import type { Project, Task, Team } from "@/types/database";
 type Assignee = { task_id: string; profile_id: string };
@@ -62,8 +63,11 @@ export default function GanttView() {
   const [teams, setTeams] = useState<Team[]>([]);
   const [members, setMembers] = useState<OrgMember[]>([]);
   const [assignees, setAssignees] = useState<Assignee[]>([]);
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
+  // Default the timeline to the signed-in user's own assigned projects.
+  const [mineOnly, setMineOnly] = useState<boolean>(true);
   const [teamFilter, setTeamFilter] = useState<string>("");
   const [personFilter, setPersonFilter] = useState<string>("");
   const [sortColumn, setSortColumn] = useState<ProjectSortColumn>("start_date");
@@ -72,7 +76,7 @@ export default function GanttView() {
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
 
   const loadAll = useCallback(async () => {
-    const [p, t, tm, m, a] = await Promise.all([
+    const [p, t, tm, m, a, u] = await Promise.all([
       supabase.from("projects").select("*"),
       supabase.from("tasks").select("*"),
       supabase.from("teams").select("*").order("name"),
@@ -81,6 +85,7 @@ export default function GanttView() {
         .select("id, full_name, email, is_external")
         .order("full_name"),
       supabase.from("task_assignees").select("task_id, profile_id"),
+      supabase.auth.getUser(),
     ]);
 
     if (p.error || t.error || tm.error || m.error || a.error) {
@@ -88,6 +93,7 @@ export default function GanttView() {
       console.error("load gantt failed:", getErrorMessage(err), err);
       toast.error("Could not load timeline data.");
     } else {
+      setCurrentUserId(u.data.user?.id ?? null);
       setProjects((p.data as Project[]) ?? []);
       setTasks((t.data as Task[]) ?? []);
       setTeams((tm.data as Team[]) ?? []);
@@ -118,25 +124,21 @@ export default function GanttView() {
   // Project ids the filtered person is involved in (owner or task assignee).
   const personProjectIds = useMemo(() => {
     if (!personFilter) return null;
-    const ids = new Set<string>();
-    projects.forEach((p) => {
-      if (p.owner_id === personFilter) ids.add(p.id);
-    });
-    const taskById = new Map(tasks.map((t) => [t.id, t]));
-    assignees
-      .filter((a) => a.profile_id === personFilter)
-      .forEach((a) => {
-        const task = taskById.get(a.task_id);
-        if (task) ids.add(task.project_id);
-      });
-    return ids;
+    return assignedProjectIds(personFilter, projects, tasks, assignees);
   }, [personFilter, projects, tasks, assignees]);
+
+  // Project ids the signed-in user is assigned to, for the "My projects" default.
+  const myProjectIds = useMemo(() => {
+    if (!currentUserId) return null;
+    return assignedProjectIds(currentUserId, projects, tasks, assignees);
+  }, [currentUserId, projects, tasks, assignees]);
 
   // Build the flat bar list for Frappe Gantt from the current filters/expansion.
   const bars = useMemo<FrappeTask[]>(() => {
     const filtered = projects.filter((p) => {
       // Per-project opt-out: only projects flagged for the Gantt are shown.
       if (!p.show_on_gantt) return false;
+      if (mineOnly && myProjectIds && !myProjectIds.has(p.id)) return false;
       if (teamFilter && p.team_id !== teamFilter) return false;
       if (personProjectIds && !personProjectIds.has(p.id)) return false;
       return true;
@@ -210,6 +212,8 @@ export default function GanttView() {
     projects,
     tasks,
     assignees,
+    mineOnly,
+    myProjectIds,
     teamFilter,
     personFilter,
     personProjectIds,
@@ -295,6 +299,19 @@ export default function GanttView() {
     <div className="space-y-4">
       <div className="flex flex-wrap items-end gap-4">
         <label className="form-control">
+          <span className="label-text mb-1">Show</span>
+          <label className="flex h-8 cursor-pointer items-center gap-2 rounded-lg border border-base-300 bg-base-100 px-3">
+            <input
+              type="checkbox"
+              className="toggle toggle-primary toggle-solid"
+              checked={mineOnly}
+              onChange={(e) => setMineOnly(e.target.checked)}
+            />
+            <span className="whitespace-nowrap text-xs">My projects</span>
+          </label>
+        </label>
+
+        <label className="form-control">
           <span className="label-text mb-1">Team</span>
           <select
             value={teamFilter}
@@ -374,10 +391,11 @@ export default function GanttView() {
           ))}
         </div>
 
-        {(teamFilter || personFilter) && (
+        {(mineOnly || teamFilter || personFilter) && (
           <button
             className="btn btn-sm btn-ghost"
             onClick={() => {
+              setMineOnly(false);
               setTeamFilter("");
               setPersonFilter("");
             }}

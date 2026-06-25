@@ -16,14 +16,21 @@ import {
   type ProjectSortColumn,
   type SortDirection,
 } from "@/libs/projectSort";
-import type { Project, Team } from "@/types/database";
+import {
+  assignedProjectIds,
+  type ProjectAssignee,
+} from "@/libs/projectInvolvement";
+import type { Project, Task, Team } from "@/types/database";
 
 export default function ProjectsClient({ orgId }: { orgId: string }) {
   const supabase = createClient();
 
   const [projects, setProjects] = useState<Project[]>([]);
+  const [tasks, setTasks] = useState<Task[]>([]);
+  const [assignees, setAssignees] = useState<ProjectAssignee[]>([]);
   const [teams, setTeams] = useState<Team[]>([]);
   const [members, setMembers] = useState<OrgMember[]>([]);
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [showCreate, setShowCreate] = useState<boolean>(false);
   const [isSaving, setIsSaving] = useState<boolean>(false);
@@ -39,6 +46,8 @@ export default function ProjectsClient({ orgId }: { orgId: string }) {
   const [status, setStatus] = useState<string>("not_started");
   const [showOnGantt, setShowOnGantt] = useState<boolean>(true);
 
+  // Default the list to the signed-in user's own assigned projects.
+  const [mineOnly, setMineOnly] = useState<boolean>(true);
   const [teamFilter, setTeamFilter] = useState<string>("");
   const [ownerFilter, setOwnerFilter] = useState<string>("");
   const [statusFilter, setStatusFilter] = useState<string>("");
@@ -46,24 +55,30 @@ export default function ProjectsClient({ orgId }: { orgId: string }) {
   const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
 
   const loadAll = useCallback(async () => {
-    const [p, t, m] = await Promise.all([
+    const [p, tk, a, t, m, u] = await Promise.all([
       supabase
         .from("projects")
         .select("*")
         .order("created_at", { ascending: false }),
+      supabase.from("tasks").select("id, project_id"),
+      supabase.from("task_assignees").select("task_id, profile_id"),
       supabase.from("teams").select("*").order("name"),
       supabase
         .from("profiles")
         .select("id, full_name, email, is_external")
         .order("full_name"),
+      supabase.auth.getUser(),
     ]);
 
-    if (p.error || t.error || m.error) {
-      const err = p.error || t.error || m.error;
+    if (p.error || tk.error || a.error || t.error || m.error) {
+      const err = p.error || tk.error || a.error || t.error || m.error;
       console.error("load projects failed:", getErrorMessage(err), err);
       toast.error("Could not load projects.");
     } else {
+      setCurrentUserId(u.data.user?.id ?? null);
       setProjects((p.data as Project[]) ?? []);
+      setTasks((tk.data as Task[]) ?? []);
+      setAssignees((a.data as ProjectAssignee[]) ?? []);
       setTeams((t.data as Team[]) ?? []);
       setMembers(
         ((m.data as OrgMember[]) ?? []).map((member) => ({
@@ -88,10 +103,19 @@ export default function ProjectsClient({ orgId }: { orgId: string }) {
     return m ? memberDisplayLabel(m) : "—";
   };
 
-  const hasActiveFilters = Boolean(teamFilter || ownerFilter || statusFilter);
+  const hasActiveFilters = Boolean(
+    mineOnly || teamFilter || ownerFilter || statusFilter
+  );
+
+  // Project ids the signed-in user is assigned to, for the "My projects" default.
+  const myProjectIds = useMemo(() => {
+    if (!currentUserId) return null;
+    return assignedProjectIds(currentUserId, projects, tasks, assignees);
+  }, [currentUserId, projects, tasks, assignees]);
 
   const visibleProjects = useMemo(() => {
     const filtered = projects.filter((p) => {
+      if (mineOnly && myProjectIds && !myProjectIds.has(p.id)) return false;
       if (teamFilter && p.team_id !== teamFilter) return false;
       if (ownerFilter && p.owner_id !== ownerFilter) return false;
       if (statusFilter && p.status !== statusFilter) return false;
@@ -107,6 +131,8 @@ export default function ProjectsClient({ orgId }: { orgId: string }) {
     );
   }, [
     projects,
+    mineOnly,
+    myProjectIds,
     teamFilter,
     ownerFilter,
     statusFilter,
@@ -126,6 +152,7 @@ export default function ProjectsClient({ orgId }: { orgId: string }) {
   };
 
   const clearFilters = () => {
+    setMineOnly(false);
     setTeamFilter("");
     setOwnerFilter("");
     setStatusFilter("");
@@ -410,6 +437,19 @@ export default function ProjectsClient({ orgId }: { orgId: string }) {
       ) : (
         <div className="space-y-4">
           <div className="flex flex-wrap items-end gap-4">
+            <label className="form-control">
+              <span className="label-text mb-1">Show</span>
+              <label className="flex h-8 cursor-pointer items-center gap-2 rounded-lg border border-base-300 bg-base-100 px-3">
+                <input
+                  type="checkbox"
+                  className="toggle toggle-primary toggle-solid"
+                  checked={mineOnly}
+                  onChange={(e) => setMineOnly(e.target.checked)}
+                />
+                <span className="whitespace-nowrap text-xs">My projects</span>
+              </label>
+            </label>
+
             <label className="form-control">
               <span className="label-text mb-1">Team</span>
               <select
