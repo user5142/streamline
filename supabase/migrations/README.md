@@ -29,6 +29,8 @@ supabase db push
 | `0008_invites_rpcs.sql` | `create_invite` / `get_invite_preview` / `redeem_invite` RPCs |
 | `0009_fix_invite_token.sql` | Fixes invite token gen to use core `gen_random_uuid()` (no pgcrypto) |
 | `0010_external_members.sql` | External org members (no auth account); `create_external_member` / `delete_external_member` RPCs |
+| `0011_project_gantt_visibility.sql` | `projects.show_on_gantt` flag (per-project Gantt visibility) |
+| `0012_todo_items.sql` | `todo_items` — per-user personal to-do list (owner-scoped RLS, drag-orderable) |
 
 ## Notes
 

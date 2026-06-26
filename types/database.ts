@@ -102,3 +102,17 @@ export interface ActionItem {
   position: number;
   created_at: string;
 }
+
+/**
+ * Personal to-do list item. Unlike most tables this is per-user (visible only
+ * to its owner), ordered by `position` so the list can be drag-reordered.
+ */
+export interface TodoItem {
+  id: string;
+  owner_id: string;
+  org_id: string | null;
+  content: string;
+  is_complete: boolean;
+  position: number;
+  created_at: string;
+}
