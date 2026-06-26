@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { createClient } from "@/libs/supabase/server";
+import { getProfile } from "@/libs/supabase/getProfile";
 import ProjectDetailClient from "./ProjectDetailClient";
 import TasksSection from "./TasksSection";
 import type { Project, Team } from "@/types/database";
@@ -17,13 +18,14 @@ export default async function ProjectPage({
   const { id } = await params;
   const supabase = await createClient();
 
-  const [projectRes, teamsRes, membersRes] = await Promise.all([
+  const [projectRes, teamsRes, membersRes, profile] = await Promise.all([
     supabase.from("projects").select("*").eq("id", id).maybeSingle(),
     supabase.from("teams").select("*").order("name"),
     supabase
       .from("profiles")
       .select("id, full_name, email, is_external")
       .order("full_name"),
+    getProfile(),
   ]);
 
   const project = projectRes.data as Project | null;
@@ -60,6 +62,7 @@ export default async function ProjectPage({
         <TasksSection
           projectId={project.id}
           orgId={project.org_id}
+          currentUserId={profile?.id ?? null}
           members={
             ((membersRes.data as {
               id: string;

@@ -29,10 +29,12 @@ const memberName = (members: OrgMember[], id: string): string => {
 export default function TasksSection({
   projectId,
   orgId,
+  currentUserId,
   members,
 }: {
   projectId: string;
   orgId: string;
+  currentUserId: string | null;
   members: OrgMember[];
 }) {
   const supabase = createClient();
@@ -50,7 +52,11 @@ export default function TasksSection({
   const [status, setStatus] = useState<string>("not_started");
   const [startDate, setStartDate] = useState<string>("");
   const [dueDate, setDueDate] = useState<string>("");
-  const [newAssignees, setNewAssignees] = useState<string[]>([]);
+  // Default a new task to be assigned to the current user, matching the
+  // "My Tasks" page behavior.
+  const [newAssignees, setNewAssignees] = useState<string[]>(
+    currentUserId ? [currentUserId] : []
+  );
 
   // New action-item draft text, keyed by task id.
   const [actionDrafts, setActionDrafts] = useState<Record<string, string>>({});
@@ -190,7 +196,7 @@ export default function TasksSection({
       setStatus("not_started");
       setStartDate("");
       setDueDate("");
-      setNewAssignees([]);
+      setNewAssignees(currentUserId ? [currentUserId] : []);
       setShowCreate(false);
       toast.success("Task added.");
     } catch (error) {
@@ -406,6 +412,9 @@ export default function TasksSection({
                         onChange={() => toggleNewAssignee(m.id)}
                       />
                       {memberDisplayLabel(m)}
+                      {m.id === currentUserId && (
+                        <span className="text-base-content/50">(you)</span>
+                      )}
                     </label>
                   ))}
                 </div>
