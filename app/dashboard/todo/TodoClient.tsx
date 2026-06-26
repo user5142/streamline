@@ -1,6 +1,13 @@
 "use client";
 
-import { useState, useEffect, useCallback, useRef, FormEvent } from "react";
+import {
+  useState,
+  useEffect,
+  useCallback,
+  useRef,
+  FormEvent,
+  DragEvent,
+} from "react";
 import { createClient } from "@/libs/supabase/client";
 import { getErrorMessage } from "@/libs/getErrorMessage";
 import toast from "react-hot-toast";
@@ -16,7 +23,11 @@ export default function TodoClient({ orgId }: { orgId: string | null }) {
 
   // Index of the row currently being dragged; null when not dragging.
   const dragIndex = useRef<number | null>(null);
-  const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
+  const [draggingIndex, setDraggingIndex] = useState<number | null>(null);
+  // Insertion point for the drop indicator: a value in [0, items.length] marking
+  // the gap the dragged row will land in (0 = above the first item, length = below
+  // the last). null hides the indicator (e.g. a no-op drop back in place).
+  const [dropIndex, setDropIndex] = useState<number | null>(null);
 
   const load = useCallback(async () => {
     const { data, error } = await supabase
@@ -126,23 +137,36 @@ export default function TodoClient({ orgId }: { orgId: string | null }) {
 
   const handleDragStart = (index: number) => {
     dragIndex.current = index;
+    setDraggingIndex(index);
   };
 
-  const handleDragOver = (e: React.DragEvent, index: number) => {
+  // Decide which gap the indicator should sit in based on whether the cursor is
+  // over the top or bottom half of the row being hovered.
+  const handleDragOver = (e: DragEvent, index: number) => {
     e.preventDefault();
-    if (dragIndex.current === null || dragIndex.current === index) return;
-    setDragOverIndex(index);
+    const from = dragIndex.current;
+    if (from === null) return;
+
+    const rect = e.currentTarget.getBoundingClientRect();
+    const isAfter = e.clientY > rect.top + rect.height / 2;
+    const target = isAfter ? index + 1 : index;
+
+    // Hide the line when the drop wouldn't move the item (the gaps directly
+    // above and below its current position).
+    setDropIndex(target === from || target === from + 1 ? null : target);
   };
 
-  const handleDrop = (index: number) => {
+  const handleDrop = () => {
     const from = dragIndex.current;
-    dragIndex.current = null;
-    setDragOverIndex(null);
-    if (from === null || from === index) return;
+    const to = dropIndex;
+    handleDragEnd();
+    if (from === null || to === null) return;
 
     const reordered = [...items];
     const [moved] = reordered.splice(from, 1);
-    reordered.splice(index, 0, moved);
+    // After removing the dragged item, indices above it shift down by one.
+    const insertAt = to > from ? to - 1 : to;
+    reordered.splice(insertAt, 0, moved);
 
     setItems(reordered.map((item, i) => ({ ...item, position: i })));
     persistOrder(reordered);
@@ -150,7 +174,8 @@ export default function TodoClient({ orgId }: { orgId: string | null }) {
 
   const handleDragEnd = () => {
     dragIndex.current = null;
-    setDragOverIndex(null);
+    setDraggingIndex(null);
+    setDropIndex(null);
   };
 
   return (
@@ -197,14 +222,32 @@ export default function TodoClient({ orgId }: { orgId: string | null }) {
               draggable
               onDragStart={() => handleDragStart(index)}
               onDragOver={(e) => handleDragOver(e, index)}
-              onDrop={() => handleDrop(index)}
+              onDrop={handleDrop}
               onDragEnd={handleDragEnd}
-              className={`flex items-center gap-3 rounded-lg border bg-base-100 px-3 py-2.5 transition-colors ${
-                dragOverIndex === index
-                  ? "border-primary"
-                  : "border-base-300"
+              className={`relative flex items-center gap-3 rounded-lg border border-base-300 bg-base-100 px-3 py-2.5 ${
+                draggingIndex === index ? "opacity-40" : ""
               }`}
             >
+              {/* Drop indicator: a brand-colored line in the gap above/below the
+                  row showing exactly where the dragged item will land. */}
+              {dropIndex === index && (
+                <span
+                  aria-hidden="true"
+                  className="pointer-events-none absolute inset-x-0 -top-[5px] z-10 flex items-center"
+                >
+                  <span className="h-2 w-2 rounded-full bg-primary" />
+                  <span className="h-0.5 flex-1 rounded-full bg-primary" />
+                </span>
+              )}
+              {dropIndex === items.length && index === items.length - 1 && (
+                <span
+                  aria-hidden="true"
+                  className="pointer-events-none absolute inset-x-0 -bottom-[5px] z-10 flex items-center"
+                >
+                  <span className="h-2 w-2 rounded-full bg-primary" />
+                  <span className="h-0.5 flex-1 rounded-full bg-primary" />
+                </span>
+              )}
               <span
                 className="cursor-grab text-base-content/30 active:cursor-grabbing"
                 aria-hidden="true"
