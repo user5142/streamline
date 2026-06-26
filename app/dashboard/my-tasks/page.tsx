@@ -1,6 +1,7 @@
 import { createClient } from "@/libs/supabase/server";
 import { getProfile } from "@/libs/supabase/getProfile";
 import type { MyTaskActionItem, MyTaskRow } from "@/libs/taskSort";
+import type { OrgMember } from "@/libs/orgMember";
 import type { ActionItem } from "@/types/database";
 import MyTasksClient from "./MyTasksClient";
 
@@ -12,18 +13,38 @@ type TaskQueryRow = Omit<MyTaskRow, "action_items">;
 // full editing on the task detail page or owning project.
 export default async function MyTasksPage() {
   const profile = await getProfile();
-  if (!profile?.id) return null;
+  if (!profile?.id || !profile.org_id) return null;
 
   const supabase = await createClient();
 
   // !inner join on task_assignees filters tasks down to ones assigned to me.
-  const { data } = await supabase
-    .from("tasks")
-    .select(
-      "id, name, status, due_date, project_id, projects(name), task_assignees!inner(profile_id)"
-    )
-    .eq("task_assignees.profile_id", profile.id)
-    .order("due_date", { ascending: true });
+  // Projects + members are loaded so a task can be created from this view.
+  const [tasksRes, projectsRes, membersRes] = await Promise.all([
+    supabase
+      .from("tasks")
+      .select(
+        "id, name, status, due_date, project_id, projects(name), task_assignees!inner(profile_id)"
+      )
+      .eq("task_assignees.profile_id", profile.id)
+      .order("due_date", { ascending: true }),
+    supabase.from("projects").select("id, name").order("name"),
+    supabase
+      .from("profiles")
+      .select("id, full_name, email, is_external")
+      .order("full_name"),
+  ]);
+
+  const { data } = tasksRes;
+
+  const projects = (projectsRes.data as { id: string; name: string }[]) ?? [];
+  const members: OrgMember[] = (
+    (membersRes.data as Partial<OrgMember>[]) ?? []
+  ).map((m) => ({
+    id: m.id as string,
+    full_name: m.full_name ?? null,
+    email: m.email ?? null,
+    is_external: m.is_external ?? false,
+  }));
 
   const taskRows = (data as unknown as TaskQueryRow[]) ?? [];
   const taskIds = taskRows.map((t) => t.id);
@@ -67,7 +88,13 @@ export default async function MyTasksPage() {
           </p>
         </div>
 
-        <MyTasksClient tasks={tasks} />
+        <MyTasksClient
+          tasks={tasks}
+          orgId={profile.org_id}
+          currentUserId={profile.id}
+          projects={projects}
+          members={members}
+        />
       </section>
     </main>
   );

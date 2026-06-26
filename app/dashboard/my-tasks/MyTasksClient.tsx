@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, type FormEvent } from "react";
 import Link from "next/link";
 import { createClient } from "@/libs/supabase/client";
 import { getErrorMessage } from "@/libs/getErrorMessage";
@@ -17,13 +17,24 @@ import {
   type SortDirection,
   type TaskSortColumn,
 } from "@/libs/taskSort";
-import type { TaskStatus } from "@/types/database";
+import { memberDisplayLabel, type OrgMember } from "@/libs/orgMember";
+import type { Task, TaskStatus } from "@/types/database";
 import toast from "react-hot-toast";
+
+type ProjectOption = { id: string; name: string };
 
 export default function MyTasksClient({
   tasks: initialTasks,
+  orgId,
+  currentUserId,
+  projects,
+  members,
 }: {
   tasks: MyTaskRow[];
+  orgId: string;
+  currentUserId: string;
+  projects: ProjectOption[];
+  members: OrgMember[];
 }) {
   const supabase = createClient();
 
@@ -34,6 +45,107 @@ export default function MyTasksClient({
   const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
   const [togglingTaskId, setTogglingTaskId] = useState<string | null>(null);
   const [togglingItemId, setTogglingItemId] = useState<string | null>(null);
+
+  // New-task form. Defaults to the current project picker + self-assigned so
+  // the created task shows up in this "assigned to me" view.
+  const [showCreate, setShowCreate] = useState<boolean>(false);
+  const [isSaving, setIsSaving] = useState<boolean>(false);
+  const [newProjectId, setNewProjectId] = useState<string>(
+    projects[0]?.id ?? ""
+  );
+  const [newName, setNewName] = useState<string>("");
+  const [newStatus, setNewStatus] = useState<string>("not_started");
+  const [newStartDate, setNewStartDate] = useState<string>("");
+  const [newDueDate, setNewDueDate] = useState<string>("");
+  const [newAssignees, setNewAssignees] = useState<string[]>([currentUserId]);
+
+  const sortedProjects = useMemo(
+    () =>
+      [...projects].sort((a, b) =>
+        a.name.localeCompare(b.name, undefined, { sensitivity: "base" })
+      ),
+    [projects]
+  );
+
+  const toggleNewAssignee = (profileId: string) =>
+    setNewAssignees((prev) =>
+      prev.includes(profileId)
+        ? prev.filter((p) => p !== profileId)
+        : [...prev, profileId]
+    );
+
+  const resetCreateForm = () => {
+    setNewProjectId(projects[0]?.id ?? "");
+    setNewName("");
+    setNewStatus("not_started");
+    setNewStartDate("");
+    setNewDueDate("");
+    setNewAssignees([currentUserId]);
+  };
+
+  const handleCreateTask = async (e: FormEvent) => {
+    e.preventDefault();
+    if (!newName.trim() || !newProjectId) return;
+    setIsSaving(true);
+    try {
+      const { data, error } = await supabase
+        .from("tasks")
+        .insert({
+          org_id: orgId,
+          project_id: newProjectId,
+          name: newName.trim(),
+          status: newStatus,
+          start_date: newStartDate || null,
+          due_date: newDueDate || null,
+        })
+        .select()
+        .single();
+      if (error) throw error;
+
+      const created = data as Task;
+
+      if (newAssignees.length) {
+        const rows = newAssignees.map((profile_id) => ({
+          task_id: created.id,
+          profile_id,
+        }));
+        const { error: aErr } = await supabase
+          .from("task_assignees")
+          .insert(rows);
+        if (aErr) throw aErr;
+      }
+
+      // This view only lists tasks assigned to me; add it locally only when
+      // I'm an assignee (otherwise it simply lives on its project).
+      if (newAssignees.includes(currentUserId)) {
+        const projectName =
+          sortedProjects.find((p) => p.id === created.project_id)?.name ?? "—";
+        const newRow: MyTaskRow = {
+          id: created.id,
+          name: created.name,
+          status: created.status,
+          due_date: created.due_date,
+          project_id: created.project_id,
+          projects: { name: projectName },
+          action_items: [],
+        };
+        setTasks((prev) => [...prev, newRow]);
+      }
+
+      resetCreateForm();
+      setShowCreate(false);
+      toast.success(
+        newAssignees.includes(currentUserId)
+          ? "Task added."
+          : "Task added to project."
+      );
+    } catch (error) {
+      console.error("create task failed:", getErrorMessage(error), error);
+      toast.error(getErrorMessage(error));
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
   const projectOptions = useMemo(() => {
     const byId = new Map<string, string>();
@@ -171,27 +283,159 @@ export default function MyTasksClient({
     setStatusFilter("");
   };
 
+  const noProjects = sortedProjects.length === 0;
+
+  const createSection = (
+    <div className="space-y-3">
+      <div className="flex items-center justify-between gap-3">
+        <p className="text-sm text-base-content/60">
+          {tasks.length === 0
+            ? "No tasks assigned to you yet."
+            : hasActiveFilters
+              ? `${visibleTasks.length} of ${tasks.length} tasks`
+              : `${tasks.length} ${tasks.length === 1 ? "task" : "tasks"}`}
+        </p>
+        <button
+          type="button"
+          className="btn btn-sm btn-primary"
+          disabled={noProjects}
+          title={
+            noProjects ? "Create a project before adding tasks." : undefined
+          }
+          onClick={() => setShowCreate((v) => !v)}
+        >
+          {showCreate ? "Cancel" : "New task"}
+        </button>
+      </div>
+
+      {showCreate && (
+        <form
+          onSubmit={handleCreateTask}
+          className="space-y-3 rounded-2xl border border-base-300 bg-base-100 p-4"
+        >
+          <div className="grid gap-3 md:grid-cols-2">
+            <label className="form-control md:col-span-2">
+              <span className="label-text mb-1">Project *</span>
+              <select
+                required
+                value={newProjectId}
+                className="select select-bordered"
+                onChange={(e) => setNewProjectId(e.target.value)}
+              >
+                {sortedProjects.map((p) => (
+                  <option key={p.id} value={p.id}>
+                    {p.name}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="form-control md:col-span-2">
+              <span className="label-text mb-1">Task name *</span>
+              <input
+                required
+                type="text"
+                value={newName}
+                className="input input-bordered"
+                onChange={(e) => setNewName(e.target.value)}
+              />
+            </label>
+            <label className="form-control">
+              <span className="label-text mb-1">Status</span>
+              <select
+                value={newStatus}
+                className="select select-bordered"
+                onChange={(e) => setNewStatus(e.target.value)}
+              >
+                {TASK_STATUSES.map((s) => (
+                  <option key={s.value} value={s.value}>
+                    {s.label}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <div className="hidden md:block" />
+            <label className="form-control">
+              <span className="label-text mb-1">Start date</span>
+              <input
+                type="date"
+                value={newStartDate}
+                className="input input-bordered"
+                onChange={(e) => setNewStartDate(e.target.value)}
+              />
+            </label>
+            <label className="form-control">
+              <span className="label-text mb-1">Due date</span>
+              <input
+                type="date"
+                value={newDueDate}
+                className="input input-bordered"
+                onChange={(e) => setNewDueDate(e.target.value)}
+              />
+            </label>
+          </div>
+
+          {members.length > 0 && (
+            <div>
+              <span className="label-text">Assignees</span>
+              <div className="mt-1 flex flex-wrap gap-3">
+                {members.map((m) => (
+                  <label
+                    key={m.id}
+                    className="flex cursor-pointer items-center gap-2 text-sm"
+                  >
+                    <input
+                      type="checkbox"
+                      className="checkbox checkbox-sm"
+                      checked={newAssignees.includes(m.id)}
+                      onChange={() => toggleNewAssignee(m.id)}
+                    />
+                    {memberDisplayLabel(m)}
+                    {m.id === currentUserId && (
+                      <span className="text-base-content/50">(you)</span>
+                    )}
+                  </label>
+                ))}
+              </div>
+            </div>
+          )}
+
+          <div className="flex justify-end">
+            <button
+              type="submit"
+              className="btn btn-primary btn-sm"
+              disabled={isSaving || !newName.trim() || !newProjectId}
+            >
+              {isSaving && (
+                <span className="loading loading-spinner loading-xs"></span>
+              )}
+              Add task
+            </button>
+          </div>
+        </form>
+      )}
+    </div>
+  );
+
   if (tasks.length === 0) {
     return (
-      <div className="rounded-2xl border border-dashed border-base-300 bg-base-100 px-6 py-16 text-center">
-        <p className="font-display text-lg font-semibold text-base-content">
-          You&apos;re all clear
-        </p>
-        <p className="mx-auto mt-1 max-w-sm text-sm text-base-content/60">
-          Tasks assigned to you will show up here once they&apos;re created on a
-          project.
-        </p>
+      <div className="space-y-4">
+        {createSection}
+        <div className="rounded-2xl border border-dashed border-base-300 bg-base-100 px-6 py-16 text-center">
+          <p className="font-display text-lg font-semibold text-base-content">
+            You&apos;re all clear
+          </p>
+          <p className="mx-auto mt-1 max-w-sm text-sm text-base-content/60">
+            Tasks assigned to you will show up here. Use{" "}
+            <span className="font-medium">New task</span> to add one.
+          </p>
+        </div>
       </div>
     );
   }
 
   return (
     <div className="space-y-4">
-      <p className="text-sm text-base-content/60">
-        {hasActiveFilters
-          ? `${visibleTasks.length} of ${tasks.length} tasks`
-          : `${tasks.length} ${tasks.length === 1 ? "task" : "tasks"}`}
-      </p>
+      {createSection}
 
       {visibleTasks.length === 0 ? (
         <div className="rounded-2xl border border-dashed border-base-300 bg-base-100 px-6 py-16 text-center">
