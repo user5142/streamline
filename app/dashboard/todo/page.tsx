@@ -11,7 +11,7 @@ export default async function TodoPage() {
     <main className="min-h-screen p-6 pb-24 lg:p-8">
       <section className="mx-auto max-w-2xl space-y-8">
         <header className="space-y-1">
-          <h1 className="font-display text-2xl font-semibold text-base-content">
+          <h1 className="font-display text-3xl font-bold tracking-tight md:text-4xl">
             To-Do List
           </h1>
           <p className="text-sm text-base-content/60">

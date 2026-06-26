@@ -84,7 +84,7 @@ const NAV_ITEMS: NavItem[] = [
   },
   {
     href: "/dashboard/todo",
-    label: "To-Do List",
+    label: "To-Do",
     icon: (
       <svg
         xmlns="http://www.w3.org/2000/svg"
