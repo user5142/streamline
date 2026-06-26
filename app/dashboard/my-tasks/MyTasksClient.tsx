@@ -10,6 +10,7 @@ import {
   taskStatusBadgeClass,
 } from "@/libs/status";
 import {
+  MY_TASK_SORT_COLUMNS,
   sortMyTasks,
   type MyTaskActionItem,
   type MyTaskRow,
@@ -29,7 +30,7 @@ export default function MyTasksClient({
   const [tasks, setTasks] = useState<MyTaskRow[]>(initialTasks);
   const [projectFilter, setProjectFilter] = useState<string>("");
   const [statusFilter, setStatusFilter] = useState<string>("");
-  const [sortColumn, setSortColumn] = useState<TaskSortColumn>("due_date");
+  const [sortColumn, setSortColumn] = useState<TaskSortColumn>("project");
   const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
   const [togglingTaskId, setTogglingTaskId] = useState<string | null>(null);
   const [togglingItemId, setTogglingItemId] = useState<string | null>(null);
@@ -59,6 +60,35 @@ export default function MyTasksClient({
 
     return sortMyTasks(filtered, sortColumn, sortDirection);
   }, [tasks, projectFilter, statusFilter, sortColumn, sortDirection]);
+
+  const projectGroups = useMemo(() => {
+    const byProject = new Map<
+      string,
+      {
+        id: string;
+        name: string;
+        tasks: MyTaskRow[];
+        completeCount: number;
+      }
+    >();
+
+    visibleTasks.forEach((task) => {
+      const group = byProject.get(task.project_id) ?? {
+        id: task.project_id,
+        name: task.projects?.name ?? "—",
+        tasks: [],
+        completeCount: 0,
+      };
+
+      group.tasks.push(task);
+      if (task.status === "complete") {
+        group.completeCount += 1;
+      }
+      byProject.set(task.project_id, group);
+    });
+
+    return [...byProject.values()];
+  }, [visibleTasks]);
 
   const updateTaskInState = (taskId: string, patch: Partial<MyTaskRow>) => {
     setTasks((prev) =>
@@ -136,47 +166,10 @@ export default function MyTasksClient({
     }
   };
 
-  const handleSort = (column: TaskSortColumn) => {
-    if (sortColumn === column) {
-      setSortDirection((d) => (d === "asc" ? "desc" : "asc"));
-    } else {
-      setSortColumn(column);
-      setSortDirection("asc");
-    }
-  };
-
   const clearFilters = () => {
     setProjectFilter("");
     setStatusFilter("");
   };
-
-  const SortHeader = ({
-    column,
-    label,
-  }: {
-    column: TaskSortColumn;
-    label: string;
-  }) => (
-    <th>
-      <button
-        type="button"
-        className="flex items-center gap-1 font-semibold hover:text-base-content"
-        onClick={() => handleSort(column)}
-      >
-        {label}
-        <span
-          className={
-            sortColumn === column
-              ? "text-base-content"
-              : "text-base-content/30"
-          }
-          aria-hidden="true"
-        >
-          {sortColumn === column ? (sortDirection === "asc" ? "↑" : "↓") : "↕"}
-        </span>
-      </button>
-    </th>
-  );
 
   if (tasks.length === 0) {
     return (
@@ -247,6 +240,40 @@ export default function MyTasksClient({
               </select>
             </label>
 
+            <label className="form-control">
+              <span className="label-text mb-1">Sort by</span>
+              <div className="flex gap-1">
+                <select
+                  value={sortColumn}
+                  className="select select-bordered select-sm"
+                  onChange={(e) => {
+                    setSortColumn(e.target.value as TaskSortColumn);
+                    setSortDirection("asc");
+                  }}
+                >
+                  {MY_TASK_SORT_COLUMNS.map((col) => (
+                    <option key={col.value} value={col.value}>
+                      {col.label}
+                    </option>
+                  ))}
+                </select>
+                <button
+                  type="button"
+                  className="btn btn-sm btn-square btn-bordered"
+                  aria-label={
+                    sortDirection === "asc"
+                      ? "Sorted ascending"
+                      : "Sorted descending"
+                  }
+                  onClick={() =>
+                    setSortDirection((d) => (d === "asc" ? "desc" : "asc"))
+                  }
+                >
+                  {sortDirection === "asc" ? "↑" : "↓"}
+                </button>
+              </div>
+            </label>
+
             {hasActiveFilters && (
               <button
                 type="button"
@@ -258,93 +285,116 @@ export default function MyTasksClient({
             )}
           </div>
 
-          <div className="overflow-hidden rounded-2xl border border-base-300 bg-base-100">
-            <table className="table">
-              <thead className="bg-base-200 text-xs uppercase tracking-wide text-base-content/50">
-                <tr>
-                  <SortHeader column="name" label="Task" />
-                  <SortHeader column="project" label="Project" />
-                  <SortHeader column="status" label="Status" />
-                  <SortHeader column="due_date" label="Due" />
-                </tr>
-              </thead>
-              <tbody>
-                {visibleTasks.map((t) => (
-                  <tr key={t.id} className="hover align-top">
-                    <td>
-                      <div className="flex items-start gap-2">
-                        <input
-                          type="checkbox"
-                          className="checkbox checkbox-sm mt-0.5"
-                          checked={t.status === "complete"}
-                          disabled={togglingTaskId === t.id}
-                          aria-label={`Mark "${t.name}" complete`}
-                          onChange={() => toggleTaskComplete(t)}
-                        />
-                        <div className="min-w-0 flex-1">
-                          <Link
-                            href={`/dashboard/tasks/${t.id}`}
-                            className={`link link-hover font-medium ${
-                              t.status === "complete"
-                                ? "line-through text-base-content/60"
-                                : ""
-                            }`}
-                          >
-                            {t.name}
-                          </Link>
-                          {t.action_items.length > 0 && (
-                            <ul className="mt-2 space-y-1 border-l-2 border-base-300 pl-3">
-                              {t.action_items.map((item) => (
-                                <li
-                                  key={item.id}
-                                  className="flex items-center gap-2 text-sm font-normal text-base-content/80"
-                                >
-                                  <input
-                                    type="checkbox"
-                                    className="checkbox checkbox-xs"
-                                    checked={item.is_complete}
-                                    disabled={togglingItemId === item.id}
-                                    aria-label={item.title}
-                                    onChange={() => toggleActionItem(t.id, item)}
-                                  />
-                                  <span
-                                    className={
-                                      item.is_complete
-                                        ? "line-through text-base-content/50"
-                                        : ""
-                                    }
-                                  >
-                                    {item.title}
-                                  </span>
-                                </li>
-                              ))}
-                            </ul>
-                          )}
-                        </div>
-                      </div>
-                    </td>
-                    <td className="text-sm">
+          <div className="space-y-4">
+            {projectGroups.map((group) => {
+              const remainingCount = group.tasks.length - group.completeCount;
+
+              return (
+                <section
+                  key={group.id}
+                  className="overflow-hidden rounded-2xl border border-base-300 bg-base-100 shadow-sm"
+                >
+                  <div className="flex flex-wrap items-center gap-3 border-b border-base-300 bg-gradient-to-r from-primary/10 via-base-100 to-base-100 px-4 py-3">
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/15 font-display text-sm font-bold text-primary">
+                      {group.name.trim().slice(0, 1).toUpperCase() || "P"}
+                    </div>
+                    <div className="min-w-0 flex-1">
                       <Link
-                        href={`/dashboard/projects/${t.project_id}`}
-                        className="link link-hover"
+                        href={`/dashboard/projects/${group.id}`}
+                        className="link link-hover font-display text-lg font-semibold text-base-content"
                       >
-                        {t.projects?.name ?? "—"}
+                        {group.name}
                       </Link>
-                    </td>
-                    <td>
-                      <span className={taskStatusBadgeClass(t.status)}>
-                        {taskStatusLabel(t.status)}
-                      </span>
-                    </td>
-                    <td className="text-sm">
-                      {t.due_date
-                        ? new Date(t.due_date).toLocaleDateString()
-                        : "—"}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+                      <p className="text-xs text-base-content/60">
+                        {group.completeCount}/{group.tasks.length} complete
+                        {remainingCount > 0
+                          ? `, ${remainingCount} remaining`
+                          : ", all wrapped"}
+                      </p>
+                    </div>
+                    <span className="badge badge-ghost">
+                      {group.tasks.length}{" "}
+                      {group.tasks.length === 1 ? "task" : "tasks"}
+                    </span>
+                  </div>
+
+                  <div className="divide-y divide-base-200">
+                    {group.tasks.map((t) => (
+                      <article
+                        key={t.id}
+                        className="grid gap-3 px-4 py-4 transition-colors hover:bg-base-200/50 md:grid-cols-[1fr_auto_auto] md:items-start"
+                      >
+                        <div className="flex items-start gap-3">
+                          <input
+                            type="checkbox"
+                            className="checkbox checkbox-sm mt-0.5"
+                            checked={t.status === "complete"}
+                            disabled={togglingTaskId === t.id}
+                            aria-label={`Mark "${t.name}" complete`}
+                            onChange={() => toggleTaskComplete(t)}
+                          />
+                          <div className="min-w-0 flex-1">
+                            <Link
+                              href={`/dashboard/tasks/${t.id}`}
+                              className={`link link-hover font-medium ${
+                                t.status === "complete"
+                                  ? "line-through text-base-content/60"
+                                  : ""
+                              }`}
+                            >
+                              {t.name}
+                            </Link>
+                            {t.action_items.length > 0 && (
+                              <ul className="mt-3 space-y-2 border-l-2 border-primary/20 pl-3">
+                                {t.action_items.map((item) => (
+                                  <li
+                                    key={item.id}
+                                    className="flex items-center gap-2 text-sm font-normal text-base-content/80"
+                                  >
+                                    <input
+                                      type="checkbox"
+                                      className="checkbox checkbox-xs"
+                                      checked={item.is_complete}
+                                      disabled={togglingItemId === item.id}
+                                      aria-label={item.title}
+                                      onChange={() =>
+                                        toggleActionItem(t.id, item)
+                                      }
+                                    />
+                                    <span
+                                      className={
+                                        item.is_complete
+                                          ? "line-through text-base-content/50"
+                                          : ""
+                                      }
+                                    >
+                                      {item.title}
+                                    </span>
+                                  </li>
+                                ))}
+                              </ul>
+                            )}
+                          </div>
+                        </div>
+
+                        <div className="md:justify-self-end">
+                          <span className={taskStatusBadgeClass(t.status)}>
+                            {taskStatusLabel(t.status)}
+                          </span>
+                        </div>
+
+                        <div className="text-sm text-base-content/60 md:min-w-24 md:text-right">
+                          <span className="md:hidden">Due </span>
+                          {t.due_date
+                            ? new Date(t.due_date).toLocaleDateString()
+                            : "No due date"}
+                        </div>
+                      </article>
+                    ))}
+                  </div>
+                </section>
+              );
+            })}
           </div>
         </>
       )}
